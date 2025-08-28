@@ -1,0 +1,28 @@
+{
+  "name": "tattooalibackend",
+  "version": "1.0.0",
+  "description": "Backend do Aplicativo web Tattoali",
+  "homepage": "https://github.com/joaobgoode/TattooAliBackend#readme",
+  "bugs": {
+    "url": "https://github.com/joaobgoode/TattooAliBackend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joaobgoode/TattooAliBackend.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7"
+  }
+}
