@@ -5,6 +5,7 @@ const healthRoutes = require('./routes/healthRoutes.js');
 const app = express();
 
 // Middlewares
+
 app.use(express.json());
 
 // Rotas
