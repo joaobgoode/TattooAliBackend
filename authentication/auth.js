@@ -4,7 +4,7 @@ const secretKey = process.env.secret_key;
 
 //Gerando um token
 function generateAccessToken(username){
-    return jwt.sign(username, secretKey, {expiresIn: '1800s'});
+    return jwt.sign(username, secretKey);
 }
 
 //Verificando o token
