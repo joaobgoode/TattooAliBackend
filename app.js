@@ -15,7 +15,7 @@ app.use('/health', healthRoutes);
 // Login
 // Registration
 // Perfil
-app.use('/user', userRoutes);
+app.use('/api/user', userRoutes);
 // Client
 // Session
 // Agenda

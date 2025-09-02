@@ -19,6 +19,10 @@ const User = sequelize.define('User', {
   bio: {
     type: DataTypes.STRING,
   },
+  cpf: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
   endereco: DataTypes.STRING,
   telefone: DataTypes.STRING,
   whatsapp: DataTypes.STRING,
