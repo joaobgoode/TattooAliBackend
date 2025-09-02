@@ -1,27 +1,32 @@
-const Tatuador = require('../models/tatuador.js');
+const User = require('../models/User.js');
 
 async function create(data) {
-  return await Tatuador.create(data);
+  return await User.create(data);
 }
 
 async function getAll() {
-  return await Tatuador.findAll();
+  return await User.findAll();
 }
 
 async function getById(id) {
-  return await Tatuador.findByPk(id);
+  return await User.findByPk(id);
 }
 
 async function update(id, data) {
-  const tatuador = await Tatuador.findByPk(id);
-  if (!tatuador) return null;
-  return await tatuador.update(data);
+  const User = await User.findByPk(id);
+  if (!User) return null;
+  return await User.update(data);
 }
 
 async function remove(id) {
-  const tatuador = await Tatuador.findByPk(id);
-  if (!tatuador) return null;
-  return await tatuador.destroy();
+  const User = await User.findByPk(id);
+  if (!User) return null;
+  return await User.destroy();
 }
 
-module.exports = { create, getAll, getById, update, remove };
+async function getByEmail(userEmail) {
+  return await User.findOne({
+    where:{ email : userEmail}})
+}
+
+module.exports = { create, getAll, getById, update, remove,getByEmail };
