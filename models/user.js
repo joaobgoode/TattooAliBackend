@@ -46,8 +46,8 @@ const User = sequelize.define('User', {
   }
 })
 
-User.beforeCreate(async (tatuador, options) => {
-  tatuador.senhaHasheada = await bcrypt.hash(tatuador.senhaHasheada, 10);
+User.beforeCreate(async (user, options) => {
+  user.senha = await bcrypt.hash(user.senha, 10);
 });
 
 module.exports = User;
