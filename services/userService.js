@@ -1,4 +1,4 @@
-const User = require('../models/User.js');
+const User = require('../models/user.js');
 
 async function create(data) {
   return await User.create(data);
@@ -26,7 +26,8 @@ async function remove(id) {
 
 async function getByEmail(userEmail) {
   return await User.findOne({
-    where:{ email : userEmail}})
+    where: { email: userEmail }
+  })
 }
 
-module.exports = { create, getAll, getById, update, remove,getByEmail };
+module.exports = { create, getAll, getById, update, remove, getByEmail };
