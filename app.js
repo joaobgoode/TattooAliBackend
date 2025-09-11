@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const healthRoutes = require('./routes/healthRoutes.js');
 const userRoutes = require('./routes/userRoutes.js');
+const imageRoutes = require('./routes/imageRoutes.js');
 const cors = require('cors');
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/health', healthRoutes);
 // Registration
 // Perfil
 app.use('/api/user', userRoutes);
+app.use('/api/image', imageRoutes);
 // Client
 // Session
 // Agenda

@@ -29,7 +29,7 @@ async function register(req, res) {
 
 async function login(req, res) {
   const {
-    nome, sobrenome, cpf, email, senha
+    email, senha
   } = req.body
   if (!email || !senha) {
     return res.status(400).json({ error: "Campos obrigatórios em branco" })
@@ -44,7 +44,7 @@ async function login(req, res) {
     if (!ok) {
       return res.status(400).json({ error: "Senha inválida" })
     }
-    const payload = { id: user.id, nome: user.nome, sobrenome: user.sobrenome, cpf: user.cpf, email: user.email }
+    const payload = { id: user.user_id, email: user.email }
     const token = auth.generateAccessToken(payload)
     return res.status(200).json({ token: token })
   } catch (error) {
