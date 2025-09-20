@@ -12,6 +12,12 @@ async function getById(id) {
   return await Client.findByPk(id);
 }
 
+async function getByName(nome) {
+  return await Client.findAll({
+    where: { nome }
+  });
+}
+
 async function update(id, data) {
   const clientInstance = await Client.findByPk(id);
   if (!clientInstance) return null;
@@ -39,7 +45,8 @@ async function belongsToUser(clientId, userId) {
 module.exports = { 
   create, 
   getAll, 
-  getById, 
+  getById,
+  getByName, 
   update, 
   remove, 
   getByPhone,

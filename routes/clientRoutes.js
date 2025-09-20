@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/userController');
+const clientController = require('../controllers/clientController');
 
 router.get('/api/clients', clientController.getClients);          // GET todos ou por nome/telefone
 router.get('/api/clients/:id', clientController.getClientById);   // GET por ID
