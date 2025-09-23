@@ -1,4 +1,5 @@
 const User = require('../models/user.js');
+const UserStyle = require("../models/user_style.js")
 
 async function create(data) {
   return await User.create(data);
