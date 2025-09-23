@@ -4,24 +4,15 @@ async function create(data) {
   return await User.create(data);
 }
 
-async function getAll() {
-  return await User.findAll();
-}
-
 async function getById(id) {
   return await User.findByPk(id);
 }
 
-async function update(id, data) {
-  const User = await User.findByPk(id);
-  if (!User) return null;
-  return await User.update(data);
-}
 
-async function remove(id) {
-  const User = await User.findByPk(id);
-  if (!User) return null;
-  return await User.destroy();
+async function updateImage(id, path) {
+  const user = await User.findByPk(id);
+  if (!user) return null;
+  return await User.update({ foto: path }, { where: { user_id: id } });
 }
 
 async function getByEmail(userEmail) {
@@ -30,4 +21,4 @@ async function getByEmail(userEmail) {
   })
 }
 
-module.exports = { create, getAll, getById, update, remove, getByEmail };
+module.exports = { create, getById, getByEmail, updateImage };
