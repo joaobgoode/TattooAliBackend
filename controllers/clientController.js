@@ -81,7 +81,7 @@ async function updateClient(req, res) {
   const { nome, telefone, descricao } = req.body;
   const user_id = req.user.id;
 
-  if (!validarNome(nome) || !validarTelefone(telefone) || !validarDescricao(descricao)) {
+  if ((nome && !validarNome(nome)) || (telefone && !validarTelefone(telefone)) || (descricao && !validarDescricao(descricao))) {
     return res.status(400).json({ error: "Campos inválidos" });
   }
 

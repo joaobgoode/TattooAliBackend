@@ -5,7 +5,7 @@ const userRoutes = require('./routes/userRoutes.js');
 const perfilRoutes = require('./routes/perfilRoutes.js');
 const imageRoutes = require('./routes/imageRoutes.js');
 const cors = require('cors');
-
+const clientRoutes = require('./routes/clientRoutes.js')
 const app = express();
 
 const allowedOrigins =
@@ -40,6 +40,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/perfil', perfilRoutes);
 app.use('/api/image', imageRoutes);
 // Client
+app.use('/api/client',clientRoutes)
 // Session
 // Agenda
 // Dashboard
