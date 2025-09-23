@@ -3,6 +3,7 @@ const express = require('express');
 const healthRoutes = require('./routes/healthRoutes.js');
 const userRoutes = require('./routes/userRoutes.js');
 const perfilRoutes = require('./routes/perfilRoutes.js');
+const imageRoutes = require('./routes/imageRoutes.js');
 const cors = require('cors');
 
 const app = express();
@@ -37,6 +38,7 @@ app.use('/health', healthRoutes);
 // Perfil
 app.use('/api/user', userRoutes);
 app.use('/api/perfil', perfilRoutes);
+app.use('/api/image', imageRoutes);
 // Client
 // Session
 // Agenda
