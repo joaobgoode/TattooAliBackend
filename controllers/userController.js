@@ -46,7 +46,15 @@ async function login(req, res) {
     }
     const payload = { id: user.user_id, email: user.email }
     const token = auth.generateAccessToken(payload)
-    return res.status(200).json({ token: token })
+    return res.status(200).json({ 
+      token: token,
+      user: {
+        id: user.user_id,
+        email: user.email,
+        nome: user.nome,
+        sobrenome: user.sobrenome
+      }
+    })
   } catch (error) {
     return res.status(400).json({ error: error.message })
   }
