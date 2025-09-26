@@ -26,7 +26,8 @@ const sessionController = {
         data_atendimento,
         valor_sessao,
         numero_sessao,
-        descricao
+        descricao,
+        realizado: null // Sessões novas são pendentes por padrão
       };
 
       const session = await sessionService.createSession(newSession);
@@ -178,6 +179,163 @@ const sessionController = {
       res.status(204).send();
     } catch (error) {
       console.error('Erro ao deletar sessão:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  // Buscar sessões realizadas
+  async getRealizadas(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const sessoes = await sessionService.getRealizadas(usuario_id);
+      res.status(200).json(sessoes);
+    } catch (error) {
+      console.error('Erro ao buscar sessões realizadas:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  // Buscar sessões canceladas
+  async getCanceladas(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const sessoes = await sessionService.getCanceladas(usuario_id);
+      res.status(200).json(sessoes);
+    } catch (error) {
+      console.error('Erro ao buscar sessões canceladas:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  //buscando sessões realizadas por data
+  async getRealizadasByDate(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { data } = req.query;
+
+      if (!data || isNaN(Date.parse(data))) {
+        return res.status(400).json({ message: 'Data inválida' });
+      }
+
+      const sessoes = await sessionService.getRealizadasByDate(usuario_id, data);
+      res.status(200).json(sessoes);
+    } catch (error) {
+      console.error('Erro ao buscar sessões realizadas por data:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  //buscando sessões canceladas por data
+  async getCanceladasByDate(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { data } = req.query;
+
+      if (!data || isNaN(Date.parse(data))) {
+        return res.status(400).json({ message: 'Data inválida' });
+      }
+
+      const sessoes = await sessionService.getCanceladasByDate(usuario_id, data);
+      res.status(200).json(sessoes);
+    } catch (error) {
+      console.error('Erro ao buscar sessões canceladas por data:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  //buscando sessões pendentes por data
+  async getSessoesPendentes(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { data } = req.query;
+
+      if (!data || isNaN(Date.parse(data))) {
+        return res.status(400).json({ message: 'Data inválida' });
+      }
+
+      const sessoes = await sessionService.getSessoesPendentes(usuario_id, data);
+      res.status(200).json(sessoes);
+    } catch (error) {
+      console.error('Erro ao buscar sessões pendentes:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  //buscando sessões realizadas por data
+  async getSessoesRealizadas(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { data } = req.query;
+
+      if (!data || isNaN(Date.parse(data))) {
+        return res.status(400).json({ message: 'Data inválida' });
+      }
+
+      const sessoes = await sessionService.getSessoesRealizadas(usuario_id, data);
+      res.status(200).json(sessoes);
+    } catch (error) {
+      console.error('Erro ao buscar sessões realizadas:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  //buscando sessões canceladas por data
+  async getSessoesCanceladas(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { data } = req.query;
+
+      console.log('=== BACKEND: getSessoesCanceladas ===');
+      console.log('Data recebida:', data);
+      console.log('Tipo da data:', typeof data);
+      console.log('Data parseada:', Date.parse(data));
+      console.log('É válida?', !isNaN(Date.parse(data)));
+
+      if (!data || isNaN(Date.parse(data))) {
+        console.log('ERRO: Data inválida - retornando 400');
+        return res.status(400).json({ message: 'Data inválida' });
+      }
+
+      const sessoes = await sessionService.getSessoesCanceladas(usuario_id, data);
+      res.status(200).json(sessoes);
+    } catch (error) {
+      console.error('Erro ao buscar sessões canceladas:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  //buscando sessões pendentes de um cliente específico
+  async getSessoesPendentesByClient(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { clienteId } = req.params;
+
+      if (!clienteId) {
+        return res.status(400).json({ message: 'ID do cliente é obrigatório' });
+      }
+
+      const sessoes = await sessionService.getSessoesPendentesByClient(usuario_id, clienteId);
+      res.status(200).json(sessoes);
+    } catch (error) {
+      console.error('Erro ao buscar sessões pendentes do cliente:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  //buscando sessões realizadas de um cliente específico
+  async getSessoesRealizadasByClient(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { clienteId } = req.params;
+
+      if (!clienteId) {
+        return res.status(400).json({ message: 'ID do cliente é obrigatório' });
+      }
+
+      const sessoes = await sessionService.getSessoesRealizadasByClient(usuario_id, clienteId);
+      res.status(200).json(sessoes);
+    } catch (error) {
+      console.error('Erro ao buscar sessões realizadas do cliente:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
   }
