@@ -26,7 +26,7 @@ async function updatePerfil(id, dataPerfil, estilos) {
 
     await user.setStyles(estilos, { transaction: t });
 
-    return user;
+    return await User.findByPk(id, { include: [Style] });
   })
 }
 
