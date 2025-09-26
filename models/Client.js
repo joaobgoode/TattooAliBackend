@@ -24,6 +24,4 @@ const Client = sequelize.define('Client', {
 
 })
 
-Client.belongsTo(User, { foreignKey: 'user_id' });
-
 module.exports = Client;
