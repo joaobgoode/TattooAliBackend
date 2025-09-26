@@ -35,7 +35,4 @@ const Session = sequelize.define('Sessao', {
   }
 });
 
-Session.belongsTo(client, { foreignKey: 'cliente_id' });
-Session.belongsTo(User, { foreignKey: 'usuario_id' });
-
 module.exports = Session;
