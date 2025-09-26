@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db/database');
 
-const User = require('./User');
+const User = require('./user');
 
 
 const Client = sequelize.define('Client', {
@@ -21,7 +21,7 @@ const Client = sequelize.define('Client', {
   telefone: {
     type: DataTypes.STRING,
   },
-  
+
 })
 
 Client.belongsTo(User, { foreignKey: 'user_id' });
