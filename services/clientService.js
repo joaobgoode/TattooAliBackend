@@ -4,8 +4,8 @@ async function create(data) {
   return await Client.create(data);
 }
 
-async function getAll() {
-  return await Client.findAll();
+async function getAll(user_id) {
+  return await Client.findAll({ where: { user_id: user_id } });
 }
 
 async function getById(id) {
@@ -42,13 +42,13 @@ async function belongsToUser(clientId, userId) {
   return client.user_id === userId;
 }
 
-module.exports = { 
-  create, 
-  getAll, 
+module.exports = {
+  create,
+  getAll,
   getById,
-  getByName, 
-  update, 
-  remove, 
+  getByName,
+  update,
+  remove,
   getByPhone,
-  belongsToUser 
+  belongsToUser
 };
