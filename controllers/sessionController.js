@@ -35,15 +35,24 @@ const sessionController = {
       console.error('Erro ao criar sessão:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
-
   },
 
   //buscando todas as sessões do usuário
   async getAll(req, res) {
+    const { cliente } = req.query;
+    if (cliente) {
+      req.cliente = cliente;
+      return await sessionController.getByClientId(req, res);
+    }
+    const { data } = req.query;
+    if (data) {
+      req.date = data;
+      return await sessionController.getByDate(req, res);
+    }
     try {
       const usuario_id = req.user.id;
       const sessions = await sessionService.getAll(usuario_id);
-      res.json(sessions);
+      return res.json(sessions);
     } catch (error) {
       console.error('Erro ao obter sessões:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
@@ -72,7 +81,7 @@ const sessionController = {
   async getByClientId(req, res) {
     try {
       const usuario_id = req.user.id;
-      const { clientId } = req.params;
+      const clientId = req.cliente;
 
       const sessions = await sessionService.getByClientId(usuario_id, clientId);
       res.json(sessions);
@@ -86,7 +95,7 @@ const sessionController = {
   async getByDate(req, res) {
     try {
       const usuario_id = req.user.id;
-      const { date } = req.params;
+      const date = req.date;
 
       if (!date || isNaN(Date.parse(date))) {
         return res.status(400).json({ message: 'Data inválida' });

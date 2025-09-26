@@ -4,8 +4,8 @@ const perfilController = require('../controllers/perfilController');
 
 const router = express.Router();
 
-router.get('/perfil', auth.authenticateToken, perfilController.getPerfil);
-router.delete('/perfil', auth.authenticateToken, perfilController.deletePerfil);
-router.put('/perfil', auth.authenticateToken, perfilController.updatePerfil);
+router.get('/', auth.authenticateToken, perfilController.getPerfil);
+router.delete('/', auth.authenticateToken, perfilController.deletePerfil);
+router.put('/', auth.authenticateToken, perfilController.updatePerfil);
 
 module.exports = router;
