@@ -1,5 +1,6 @@
 const app = require('./app.js');
 const sequelize = require('./db/database.js');
+require('./models/associations.js');
 
 sequelize.sync().then(() => {
   console.log('Banco sincronizado!');
