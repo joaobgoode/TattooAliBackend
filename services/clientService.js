@@ -4,8 +4,10 @@ async function create(data) {
   return await Client.create(data);
 }
 
-async function getAll() {
-  return await Client.findAll();
+async function getAll(userId) {
+  return await Client.findAll({
+    where: { user_id: userId }
+  });
 }
 
 async function getById(id) {
