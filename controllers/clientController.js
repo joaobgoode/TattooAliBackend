@@ -48,7 +48,8 @@ async function getClients(req, res) {
       const client = await clientService.getByPhone(telefone);
       return res.status(200).json(client);
     }
-    const clients = await clientService.getAll();
+    const user_id = req.user.id;
+    const clients = await clientService.getAll(user_id);
     return res.status(200).json(clients);
   } catch (error) {
     return res.status(400).json({ error: error.message });
