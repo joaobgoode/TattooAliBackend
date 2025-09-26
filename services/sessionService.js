@@ -1,5 +1,5 @@
 const sessao = require('../models/Session.js');
-const user = require('../models/user.js');
+const { Op } = require('sequelize');
 
 async function verifySession(userId, sessionId) {
   const session = await sessao.findOne({
@@ -28,8 +28,16 @@ async function getByClientId(userId, clientId) {
 }
 
 async function getByDate(userId, date) {
+  const startOfDay = new Date(`${date}T00:00:00-03:00`);
+  const endOfDay = new Date(`${date}T23:59:59-03:00`);
+
   return await sessao.findAll({
-    where: { data_atendimento: date, usuario_id: userId }
+    where: {
+      usuario_id: userId,
+      data_atendimento: {
+        [Op.between]: [startOfDay, endOfDay]
+      }
+    }
   });
 }
 
