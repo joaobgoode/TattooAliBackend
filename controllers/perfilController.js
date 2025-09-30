@@ -127,28 +127,12 @@ async function updatePerfil(req, res) {
   const { user_id, email, nome, sobrenome, bio, cpf, endereco, telefone, whatsapp, instagram, especialidades, foto } = req.body;
   const { id } = req.user;
 
-  if (id !== user_id) {
-    return res.status(401).json({ message: 'Não autorizado' });
-  }
-
-  if (!email) {
-    return res.status(400).json({ message: 'Campo obrigatório não preenchido: email' });
-  }
-
-  if (!nome) {
-    return res.status(400).json({ message: 'Campo obrigatório não preenchido: nome' });
-  }
-
-  if (!sobrenome) {
-    return res.status(400).json({ message: 'Campo obrigatório não preenchido: sobrenome' });
-  }
-
-  if (!cpf) {
-    return res.status(400).json({ message: 'Campo obrigatório não preenchido: cpf' });
-  }
-
   if (email && !validadeEmail(email)) {
     return res.status(400).json({ message: 'Email inválido' });
+  }
+
+  if (id !== user_id) {
+    return res.status(401).json({ message: 'Não autorizado' });
   }
 
   if (nome) {
@@ -188,7 +172,7 @@ async function updatePerfil(req, res) {
   }
 
   try {
-    const perfil = await perfilService.updatePerfil(id, req.body, req.body.especialidades);
+    const perfil = await perfilService.updatePerfil(id, req.body, req.body.Styles);
     return res.status(200).json(perfil);
   } catch (error) {
     return res.status(400).json({ message: error.message });

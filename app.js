@@ -7,6 +7,7 @@ const imageRoutes = require('./routes/imageRoutes.js');
 const sessionRoutes = require('./routes/sessionRoutes.js');
 const cors = require('cors');
 const clientRoutes = require('./routes/clientRoutes.js')
+const styleRoutes = require('./routes/styleRoutes.js')
 const app = express();
 
 const allowedOrigins =
@@ -40,8 +41,9 @@ app.use('/health', healthRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/perfil', perfilRoutes);
 app.use('/api/image', imageRoutes);
+app.use('/api/style', styleRoutes)
 // Client
-app.use('/api/client',clientRoutes)
+app.use('/api/client', clientRoutes)
 // Session
 app.use('/api/sessions', sessionRoutes);
 // Agenda
