@@ -9,6 +9,7 @@ const cors = require('cors');
 const clientRoutes = require('./routes/clientRoutes.js')
 const styleRoutes = require('./routes/styleRoutes.js')
 const app = express();
+const setupSwagger = require('./swagger.js')
 
 const allowedOrigins =
   process.env.NODE_ENV === "production"
@@ -50,4 +51,5 @@ app.use('/api/sessions', sessionRoutes);
 // Dashboard
 // AI
 
+setupSwagger(app)
 module.exports = app;
