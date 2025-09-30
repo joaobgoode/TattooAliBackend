@@ -10,6 +10,7 @@ const clientRoutes = require('./routes/clientRoutes.js')
 const styleRoutes = require('./routes/styleRoutes.js')
 const app = express();
 const setupSwagger = require('./swagger.js')
+const swaggerUI = require('swagger-ui-express')
 
 const allowedOrigins =
   process.env.NODE_ENV === "production"
@@ -51,5 +52,5 @@ app.use('/api/sessions', sessionRoutes);
 // Dashboard
 // AI
 
-setupSwagger(app)
+app.use('/docs', swaggerUI.serve, swaggerUI.setup(setupSwagger))
 module.exports = app;

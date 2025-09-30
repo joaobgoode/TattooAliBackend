@@ -1,7 +1,7 @@
 const userService = require('../services/userService');
 const auth = require('../authentication/auth.js')
 
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 
 async function register(req, res) {
   const {
