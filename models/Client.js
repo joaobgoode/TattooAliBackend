@@ -3,7 +3,6 @@ const sequelize = require('../db/database');
 
 const User = require('./user');
 
-
 const Client = sequelize.define('Client', {
   client_id: {
     type: DataTypes.INTEGER,
@@ -15,15 +14,20 @@ const Client = sequelize.define('Client', {
     allowNull: false
   },
   descricao: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING
   },
-
   telefone: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING
   },
-
-})
+  endereco: {
+    type: DataTypes.STRING,
+    validate: {
+      len: [0, 255]
+    }
+  }
+});
 
 Client.belongsTo(User, { foreignKey: 'user_id' });
 
 module.exports = Client;
+

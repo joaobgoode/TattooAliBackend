@@ -344,6 +344,14 @@ router.put('/realizar/:id', auth.authenticateToken, sessionController.changeStat
  *         $ref: '#/components/responses/ServerError'
  */
 router.delete('/:id', auth.authenticateToken, sessionController.deleteSession);
+
+router.get('/pendentes', auth.authenticateToken, sessionController.getPendingSessions);
+router.get('/realizadas', auth.authenticateToken, sessionController.getRealizedSessions);
+router.get('/canceladas', auth.authenticateToken, sessionController.getCanceledSessions);
+router.get('/cliente/:clienteId/pendentes', auth.authenticateToken, sessionController.getClientPendingSessions);
+router.get('/cliente/:clienteId/realizadas', auth.authenticateToken, sessionController.getClientRealizedSessions);
+router.get('/cliente/:clienteId/canceladas', auth.authenticateToken, sessionController.getClientCanceledSessions);
+
 module.exports = router;
 
 
