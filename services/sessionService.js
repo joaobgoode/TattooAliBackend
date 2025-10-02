@@ -20,7 +20,7 @@ async function verifySession(userId, sessionId) {
 
 async function getAll(userId) {
   return await sessao.findAll({
-    where: { usuario_id: userId },
+    where: { usuario_id: userId, cancelado: false },
     include: includeCliente
   });
 }
@@ -34,7 +34,7 @@ async function getById(userId, sessionId) {
 
 async function getByClientId(userId, clientId) {
   return await sessao.findAll({
-    where: { cliente_id: clientId, usuario_id: userId },
+    where: { cliente_id: clientId, usuario_id: userId, cancelado: false },
     include: includeCliente
   });
 }
@@ -46,7 +46,8 @@ async function getByDate(userId, date) {
   return await sessao.findAll({
     where: {
       usuario_id: userId,
-      data_atendimento: { [Op.between]: [startOfDay, endOfDay] }
+      data_atendimento: { [Op.between]: [startOfDay, endOfDay] },
+      cancelado: false
     },
     include: includeCliente
   });
@@ -85,14 +86,14 @@ async function deleteSession(sessionId) {
 // Sessões pendentes, realizadas e canceladas
 async function getPendingSessions(userId) {
   return await sessao.findAll({
-    where: { usuario_id: userId, realizado: false },
+    where: { usuario_id: userId, realizado: false, cancelado: false },
     include: includeCliente
   });
 }
 
 async function getRealizedSessions(userId) {
   return await sessao.findAll({
-    where: { usuario_id: userId, realizado: true },
+    where: { usuario_id: userId, realizado: true, cancelado: false },
     include: includeCliente
   });
 }
@@ -107,14 +108,14 @@ async function getCanceledSessions(userId) {
 // Sessões por cliente
 async function getClientPendingSessions(userId, clientId) {
   return await sessao.findAll({
-    where: { usuario_id: userId, cliente_id: clientId, realizado: false },
+    where: { usuario_id: userId, cliente_id: clientId, realizado: false, cancelado: false },
     include: includeCliente
   });
 }
 
 async function getClientRealizedSessions(userId, clientId) {
   return await sessao.findAll({
-    where: { usuario_id: userId, cliente_id: clientId, realizado: true },
+    where: { usuario_id: userId, cliente_id: clientId, realizado: true, cancelado: false },
     include: includeCliente
   });
 }
@@ -131,7 +132,7 @@ async function getPendingSessionsByDate(userId, date) {
   const startOfDay = new Date(`${date}T00:00:00-03:00`);
   const endOfDay = new Date(`${date}T23:59:59-03:00`);
   return await sessao.findAll({
-    where: { usuario_id: userId, realizado: false, data_atendimento: { [Op.between]: [startOfDay, endOfDay] } },
+    where: { usuario_id: userId, realizado: false, data_atendimento: { [Op.between]: [startOfDay, endOfDay] }, cancelado: false },
     include: includeCliente
   });
 }
@@ -140,7 +141,7 @@ async function getRealizedSessionsByDate(userId, date) {
   const startOfDay = new Date(`${date}T00:00:00-03:00`);
   const endOfDay = new Date(`${date}T23:59:59-03:00`);
   return await sessao.findAll({
-    where: { usuario_id: userId, realizado: true, data_atendimento: { [Op.between]: [startOfDay, endOfDay] } },
+    where: { usuario_id: userId, realizado: true, data_atendimento: { [Op.between]: [startOfDay, endOfDay] }, cancelado: false },
     include: includeCliente
   });
 }
@@ -159,7 +160,13 @@ async function getClientPendingSessionsByDate(userId, clientId, date) {
   const startOfDay = new Date(`${date}T00:00:00-03:00`);
   const endOfDay = new Date(`${date}T23:59:59-03:00`);
   return await sessao.findAll({
-    where: { usuario_id: userId, cliente_id: clientId, realizado: false, data_atendimento: { [Op.between]: [startOfDay, endOfDay] } },
+    where: {
+      usuario_id: userId,
+      cliente_id: clientId,
+      realizado: false,
+      data_atendimento: { [Op.between]: [startOfDay, endOfDay] },
+      cancelado: false
+    },
     include: includeCliente
   });
 }
@@ -168,7 +175,13 @@ async function getClientRealizedSessionsByDate(userId, clientId, date) {
   const startOfDay = new Date(`${date}T00:00:00-03:00`);
   const endOfDay = new Date(`${date}T23:59:59-03:00`);
   return await sessao.findAll({
-    where: { usuario_id: userId, cliente_id: clientId, realizado: true, data_atendimento: { [Op.between]: [startOfDay, endOfDay] } },
+    where: {
+      usuario_id: userId,
+      cliente_id: clientId,
+      realizado: true,
+      data_atendimento: { [Op.between]: [startOfDay, endOfDay] },
+      cancelado: false
+    },
     include: includeCliente
   });
 }
