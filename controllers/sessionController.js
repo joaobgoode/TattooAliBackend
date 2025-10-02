@@ -180,6 +180,195 @@ const sessionController = {
       console.error('Erro ao deletar sessão:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
+  },
+
+  async getPendingSessions(req, res) {
+    const { data } = req.query;
+    if (data) {
+      req.date = data;
+      return await sessionController.getPendingSessionsByDate(req, res);
+    }
+    try {
+      const usuario_id = req.user.id;
+      const sessions = await sessionService.getPendingSessions(usuario_id);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  async getRealizedSessions(req, res) {
+    const { data } = req.query;
+    if (data) {
+      req.date = data;
+      return await sessionController.getPendingSessionsByDate(req, res);
+    }
+    try {
+      const usuario_id = req.user.id;
+      const sessions = await sessionService.getRealizedSessions(usuario_id);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  async getCanceledSessions(req, res) {
+    const { data } = req.query;
+    if (data) {
+      req.date = data;
+      return await sessionController.getPendingSessionsByDate(req, res);
+    }
+    try {
+      const usuario_id = req.user.id;
+      const sessions = await sessionService.getCanceledSessions(usuario_id);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  async getClientPendingSessions(req, res) {
+    const { data } = req.query;
+    if (data) {
+      req.date = data;
+      return await sessionController.getPendingSessionsByDate(req, res);
+    }
+    try {
+      const usuario_id = req.user.id;
+      const { clienteId } = req.params;
+      if (!await sessionService.verifyClient(usuario_id, clienteId)) {
+        return res.status(404).json({ message: 'Cliente não encontrado.' });
+      }
+      const sessions = await sessionService.getClientPendingSessions(usuario_id, clienteId);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  async getClientRealizedSessions(req, res) {
+    const { data } = req.query;
+    if (data) {
+      req.date = data;
+      return await sessionController.getPendingSessionsByDate(req, res);
+    }
+    try {
+      const usuario_id = req.user.id;
+      const { clienteId } = req.params;
+      if (!await sessionService.verifyClient(usuario_id, clienteId)) {
+        return res.status(404).json({ message: 'Cliente não encontrado.' });
+      }
+      const sessions = await sessionService.getClientRealizedSessions(usuario_id, clienteId);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  async getClientCanceledSessions(req, res) {
+    const { data } = req.query;
+    if (data) {
+      req.date = data;
+      return await sessionController.getPendingSessionsByDate(req, res);
+    }
+    try {
+      const usuario_id = req.user.id;
+      const { clienteId } = req.params;
+      if (!await sessionService.verifyClient(usuario_id, clienteId)) {
+        return res.status(404).json({ message: 'Cliente não encontrado.' });
+      }
+      const sessions = await sessionService.getClientCanceledSessions(usuario_id, clienteId);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  async getPendingSessionsByDate(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { data } = req.date;
+      if (!data || isNaN(Date.parse(data))) {
+        return res.status(400).json({ message: 'Data inválida' });
+      }
+      const sessions = await sessionService.getPendingSessionsByDate(usuario_id, data);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  async getRealizedSessionsByDate(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { data } = req.date;
+      if (!data || isNaN(Date.parse(data))) {
+        return res.status(400).json({ message: 'Data inválida' });
+      }
+      const sessions = await sessionService.getRealizedSessionsByDate(usuario_id, data);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  async getCanceledSessionsByDate(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { data } = req.date;
+      if (!data || isNaN(Date.parse(data))) {
+        return res.status(400).json({ message: 'Data inválida' });
+      }
+      const sessions = await sessionService.getCanceledSessionsByDate(usuario_id, data);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  async getClientPendingSessionsByDate(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { clienteId } = req.params;
+      const { data } = req.date;
+      if (!data || isNaN(Date.parse(data))) {
+        return res.status(400).json({ message: 'Data inválida' });
+      }
+      const sessions = await sessionService.getClientPendingSessionsByDate(usuario_id, clienteId, data);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  async getClientRealizedSessionsByDate(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { clienteId } = req.params;
+      const { data } = req.date;
+      if (!data || isNaN(Date.parse(data))) {
+        return res.status(400).json({ message: 'Data inválida' });
+      }
+      const sessions = await sessionService.getClientRealizedSessionsByDate(usuario_id, clienteId, data);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+
+  async getClientCanceledSessionsByDate(req, res) {
+    try {
+      const usuario_id = req.user.id;
+      const { clienteId } = req.params;
+      const { data } = req.date;
+      if (!data || isNaN(Date.parse(data))) {
+        return res.status(400).json({ message: 'Data inválida' });
+      }
+      const sessions = await sessionService.getClientCanceledSessionsByDate(usuario_id, clienteId, data);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
   }
 }
 
