@@ -32,6 +32,16 @@ const Session = sequelize.define('Sessao', {
   realizado: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
+  },
+  cancelado: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  motivo: {
+    type: DataTypes.STRING,
+    validate: {
+      len: [0, 255]
+    }
   }
 });
 
