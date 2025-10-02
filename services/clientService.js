@@ -1,4 +1,6 @@
 const Client = require('../models/Client.js');
+import { Op, fn, col, where } from 'sequelize';
+
 
 async function create(data) {
   return await Client.create(data);
@@ -14,7 +16,12 @@ async function getById(id) {
 
 async function getByName(nome) {
   return await Client.findAll({
-    where: { nome }
+    where: where(
+      fn('unaccent', col('name')),
+      {
+        [Op.iLike]: `%${searchTerm}%`
+      }
+    )
   });
 }
 
