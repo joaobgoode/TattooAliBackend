@@ -15,19 +15,26 @@ async function deletePerfilById(id) {
   await user.destroy();
 }
 
-async function updatePerfil(id, dataPerfil, estilos) {
+async function updatePerfil(id, dataPerfil, estilosIds) {
   const user = await User.findByPk(id);
   if (!user) {
     throw new Error('Perfil não encontrado');
   }
-  return await sequelize.transaction(async (t) => {
 
+  return await sequelize.transaction(async (t) => {
     await user.update(dataPerfil, { transaction: t });
 
-    await user.setStyles(estilos, { transaction: t });
+    if (estilosIds) {
+      await user.setStyles(estilosIds, { transaction: t });
+    }
 
-    return await User.findByPk(id, { include: [Style] });
-  })
+    return await User.findByPk(id, { include: [Style], transaction: t });
+  });
 }
 
-module.exports = { getPerfilById, deletePerfilById, updatePerfil };
+async function updateImage(userId, imagePath) {
+  const user = await User.findByPk(userId);
+  return await user.update({ foto: imagePath });
+}
+
+module.exports = { getPerfilById, deletePerfilById, updatePerfil, updateImage };
