@@ -189,6 +189,14 @@ router.get('/cliente/:clienteId/pendentes', auth.authenticateToken, sessionContr
 router.get('/cliente/:clienteId/realizadas', auth.authenticateToken, sessionController.getClientRealizedSessions);
 router.get('/cliente/:clienteId/canceladas', auth.authenticateToken, sessionController.getClientCanceledSessions);
 
+// Rotas para filtros por data
+router.get('/pendentes/data', auth.authenticateToken, sessionController.getPendingSessionsByDate);
+router.get('/realizadas/data', auth.authenticateToken, sessionController.getRealizedSessionsByDate);
+router.get('/canceladas/data', auth.authenticateToken, sessionController.getCanceledSessionsByDate);
+router.get('/cliente/:clienteId/pendentes/data', auth.authenticateToken, sessionController.getClientPendingSessionsByDate);
+router.get('/cliente/:clienteId/realizadas/data', auth.authenticateToken, sessionController.getClientRealizedSessionsByDate);
+router.get('/cliente/:clienteId/canceladas/data', auth.authenticateToken, sessionController.getClientCanceledSessionsByDate);
+
 /**
  * @swagger
  * /sessions/{id}:
