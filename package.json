@@ -19,6 +19,7 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@google/genai": "^1.22.0",
     "aws-sdk": "^2.1692.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
