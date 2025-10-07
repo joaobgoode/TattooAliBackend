@@ -200,6 +200,9 @@ router.get('/cliente/:clienteId/pendentes/data', auth.authenticateToken, session
 router.get('/cliente/:clienteId/realizadas/data', auth.authenticateToken, sessionController.getClientRealizedSessionsByDate);
 router.get('/cliente/:clienteId/canceladas/data', auth.authenticateToken, sessionController.getClientCanceledSessionsByDate);
 
+// Rota para buscar sessão por ID (deve vir por último para evitar conflitos)
+router.get('/:id', auth.authenticateToken, sessionController.getById);
+
 /**
  * @swagger
  * /sessions/{id}:
@@ -222,7 +225,6 @@ router.get('/cliente/:clienteId/canceladas/data', auth.authenticateToken, sessio
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get('/:id', auth.authenticateToken, sessionController.getById);
 
 /**
  * @swagger
