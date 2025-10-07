@@ -183,16 +183,23 @@ const sessionController = {
   },
 
   async getPendingSessions(req, res) {
+    console.log('=== getPendingSessions ===');
+    console.log('req.query:', req.query);
+    
     const { data } = req.query;
     if (data) {
+      console.log('Data encontrada, redirecionando para getPendingSessionsByDate');
       req.query.date = data;
       return await sessionController.getPendingSessionsByDate(req, res);
     }
+    
+    console.log('Sem data, buscando todas as sessões pendentes');
     try {
       const usuario_id = req.user.id;
       const sessions = await sessionService.getPendingSessions(usuario_id);
       res.status(200).json(sessions);
     } catch (error) {
+      console.error('Erro em getPendingSessions:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
   },
@@ -286,14 +293,30 @@ const sessionController = {
 
   async getPendingSessionsByDate(req, res) {
     try {
+      console.log('=== getPendingSessionsByDate ===');
+      console.log('req.query:', req.query);
+      console.log('req.user:', req.user);
+      
       const usuario_id = req.user.id;
       const { date } = req.query;
+      
+      console.log('usuario_id:', usuario_id);
+      console.log('date:', date);
+      console.log('date type:', typeof date);
+      console.log('isNaN(Date.parse(date)):', isNaN(Date.parse(date)));
+      
       if (!date || isNaN(Date.parse(date))) {
+        console.log('Data inválida detectada');
         return res.status(400).json({ message: 'Data inválida' });
       }
+      
+      console.log('Chamando sessionService.getPendingSessionsByDate...');
       const sessions = await sessionService.getPendingSessionsByDate(usuario_id, date);
+      console.log('Sessões encontradas:', sessions?.length || 0);
+      
       res.status(200).json(sessions);
     } catch (error) {
+      console.error('Erro em getPendingSessionsByDate:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
   },
