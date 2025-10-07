@@ -201,7 +201,7 @@ const sessionController = {
     const { data } = req.query;
     if (data) {
       req.query.date = data;
-      return await sessionController.getPendingSessionsByDate(req, res);
+      return await sessionController.getRealizedSessionsByDate(req, res);
     }
     try {
       const usuario_id = req.user.id;
@@ -216,7 +216,7 @@ const sessionController = {
     const { data } = req.query;
     if (data) {
       req.query.date = data;
-      return await sessionController.getPendingSessionsByDate(req, res);
+      return await sessionController.getCanceledSessionsByDate(req, res);
     }
     try {
       const usuario_id = req.user.id;
