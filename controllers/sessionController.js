@@ -46,7 +46,7 @@ const sessionController = {
     }
     const { data } = req.query;
     if (data) {
-      req.date = data;
+      req.query.date = data;
       return await sessionController.getByDate(req, res);
     }
     try {
@@ -185,7 +185,7 @@ const sessionController = {
   async getPendingSessions(req, res) {
     const { data } = req.query;
     if (data) {
-      req.date = data;
+      req.query.date = data;
       return await sessionController.getPendingSessionsByDate(req, res);
     }
     try {
@@ -200,7 +200,7 @@ const sessionController = {
   async getRealizedSessions(req, res) {
     const { data } = req.query;
     if (data) {
-      req.date = data;
+      req.query.date = data;
       return await sessionController.getPendingSessionsByDate(req, res);
     }
     try {
@@ -215,7 +215,7 @@ const sessionController = {
   async getCanceledSessions(req, res) {
     const { data } = req.query;
     if (data) {
-      req.date = data;
+      req.query.date = data;
       return await sessionController.getPendingSessionsByDate(req, res);
     }
     try {
@@ -230,7 +230,7 @@ const sessionController = {
   async getClientPendingSessions(req, res) {
     const { data } = req.query;
     if (data) {
-      req.date = data;
+      req.query.date = data;
       return await sessionController.getPendingSessionsByDate(req, res);
     }
     try {
@@ -249,7 +249,7 @@ const sessionController = {
   async getClientRealizedSessions(req, res) {
     const { data } = req.query;
     if (data) {
-      req.date = data;
+      req.query.date = data;
       return await sessionController.getPendingSessionsByDate(req, res);
     }
     try {
@@ -268,7 +268,7 @@ const sessionController = {
   async getClientCanceledSessions(req, res) {
     const { data } = req.query;
     if (data) {
-      req.date = data;
+      req.query.date = data;
       return await sessionController.getPendingSessionsByDate(req, res);
     }
     try {
@@ -287,7 +287,7 @@ const sessionController = {
   async getPendingSessionsByDate(req, res) {
     try {
       const usuario_id = req.user.id;
-      const { data } = req.date;
+      const { date } = req.query;
       if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
@@ -301,7 +301,7 @@ const sessionController = {
   async getRealizedSessionsByDate(req, res) {
     try {
       const usuario_id = req.user.id;
-      const { data } = req.date;
+      const { date } = req.query;
       if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
@@ -315,7 +315,7 @@ const sessionController = {
   async getCanceledSessionsByDate(req, res) {
     try {
       const usuario_id = req.user.id;
-      const { data } = req.date;
+      const { date } = req.query;
       if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
@@ -330,7 +330,7 @@ const sessionController = {
     try {
       const usuario_id = req.user.id;
       const { clienteId } = req.params;
-      const { data } = req.date;
+      const { date } = req.query;
       if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
@@ -345,7 +345,7 @@ const sessionController = {
     try {
       const usuario_id = req.user.id;
       const { clienteId } = req.params;
-      const { data } = req.date;
+      const { date } = req.query;
       if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
@@ -360,7 +360,7 @@ const sessionController = {
     try {
       const usuario_id = req.user.id;
       const { clienteId } = req.params;
-      const { data } = req.date;
+      const { date } = req.query;
       if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }

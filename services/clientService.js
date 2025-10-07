@@ -1,5 +1,5 @@
 const Client = require('../models/Client.js');
-const { Op, fn, col, where } = require ('sequelize');
+const { Op, fn, col, where } = require('sequelize');
 
 
 async function create(data) {
