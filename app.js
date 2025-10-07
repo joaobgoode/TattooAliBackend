@@ -7,6 +7,7 @@ const imageRoutes = require('./routes/imageRoutes.js');
 const sessionRoutes = require('./routes/sessionRoutes.js');
 const cors = require('cors');
 const clientRoutes = require('./routes/clientRoutes.js')
+const dashboardRoutes = require('./routes/dashboardRoutes.js')
 const styleRoutes = require('./routes/styleRoutes.js')
 const app = express();
 const setupSwagger = require('./swagger.js')
@@ -50,6 +51,7 @@ app.use('/api/client', clientRoutes)
 app.use('/api/sessions', sessionRoutes);
 // Agenda
 // Dashboard
+app.use('/api/dashboard', dashboardRoutes);
 // AI
 
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(setupSwagger))
