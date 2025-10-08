@@ -1,5 +1,6 @@
 const sessionService = require('../services/sessionService');
 const { validationResult } = require('express-validator');
+const { belongsToUser } = require('../services/clientService.js');
 
 const sessionController = {
   //criando uma nova sessão
@@ -234,7 +235,7 @@ const sessionController = {
     try {
       const usuario_id = req.user.id;
       const { clienteId } = req.params;
-      if (!await sessionService.verifyClient(usuario_id, clienteId)) {
+      if (!await belongsToUser(clienteId, usuario_id)) {
         return res.status(404).json({ message: 'Cliente não encontrado.' });
       }
       const sessions = await sessionService.getClientPendingSessions(usuario_id, clienteId);
@@ -252,7 +253,7 @@ const sessionController = {
     try {
       const usuario_id = req.user.id;
       const { clienteId } = req.params;
-      if (!await sessionService.verifyClient(usuario_id, clienteId)) {
+      if (!await belongsToUser(clienteId, usuario_id)) {
         return res.status(404).json({ message: 'Cliente não encontrado.' });
       }
       const sessions = await sessionService.getClientRealizedSessions(usuario_id, clienteId);
@@ -270,7 +271,7 @@ const sessionController = {
     try {
       const usuario_id = req.user.id;
       const { clienteId } = req.params;
-      if (!await sessionService.verifyClient(usuario_id, clienteId)) {
+      if (!await belongsToUser(clienteId, usuario_id)) {
         return res.status(404).json({ message: 'Cliente não encontrado.' });
       }
       const sessions = await sessionService.getClientCanceledSessions(usuario_id, clienteId);

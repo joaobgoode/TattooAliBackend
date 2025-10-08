@@ -13,22 +13,27 @@ function validarDescricao(descricao) {
   return !descricao || descricao.length <= 480;
 }
 
+function validarEndereco(endereco) {
+  return !endereco || endereco.length <= 480;
+}
+
+
 //Criar cliente
 async function createClient(req, res) {
-  const { nome, telefone, descricao } = req.body;
+  const { nome, telefone, descricao, endereco } = req.body;
 
   if (!nome) {
     return res.status(400).json({ error: "Campos obrigatórios em branco" });
   }
 
-  if (!validarNome(nome) || !validarTelefone(telefone) || !validarDescricao(descricao)) {
+  if (!validarNome(nome) || !validarTelefone(telefone) || !validarDescricao(descricao) || !validarEndereco(endereco)) {
     return res.status(400).json({ error: "Campos inválidos" });
   }
 
   const user_id = req.user.id;
 
   try {
-    const novoCliente = { nome, telefone, descricao, user_id };
+    const novoCliente = { nome, telefone, descricao, user_id, endereco };
     const novoRegistro = await clientService.create(novoCliente);
     return res.status(201).json(novoRegistro);
   } catch (error) {
@@ -79,10 +84,10 @@ async function getClientById(req, res) {
 // Atualizar cliente
 async function updateClient(req, res) {
   const { id } = req.params;
-  const { nome, telefone, descricao } = req.body;
+  const { nome, telefone, descricao, endereco } = req.body;
   const user_id = req.user.id;
 
-  if ((nome && !validarNome(nome)) || (telefone && !validarTelefone(telefone)) || (descricao && !validarDescricao(descricao))) {
+  if ((nome && !validarNome(nome)) || (telefone && !validarTelefone(telefone)) || (descricao && !validarDescricao(descricao)) || (endereco && !validarEndereco(endereco))) {
     return res.status(400).json({ error: "Campos inválidos" });
   }
 
@@ -91,7 +96,7 @@ async function updateClient(req, res) {
     if (!isOwner) {
       return res.status(403).json({ error: "Acesso negado" });
     }
-    const updated = await clientService.update(id, { nome, telefone, descricao });
+    const updated = await clientService.update(id, { nome, telefone, descricao, endereco });
     if (!updated) {
       return res.status(404).json({ error: "Cliente não encontrado" });
     }

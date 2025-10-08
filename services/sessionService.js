@@ -6,7 +6,7 @@ const includeCliente = [
   {
     model: client,
     as: 'cliente',
-    attributes: ['client_id', 'nome', 'telefone']
+    attributes: ['client_id', 'nome', 'telefone', 'descricao', 'endereco']
   }
 ];
 
