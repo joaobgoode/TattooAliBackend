@@ -1,7 +1,7 @@
 const { XLOCK } = require('sequelize/lib/table-hints')
 const Client = require('../models/Client.js')
 const Sessions = require('../models/Session.js')
-const {Op, fn, literal} = require('../sequelize')
+const {Op, fn, literal} = require('sequelize')
 const { Where } = require('sequelize/lib/utils')
 
 async function totalSessionsOfDay(user_id, day, month, year) {
