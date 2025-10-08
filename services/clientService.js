@@ -17,7 +17,7 @@ async function getById(id) {
 async function getByName(nome) {
   return await Client.findAll({
     where: where(
-      fn('unaccent', col('name')),
+      fn('unaccent', col('nome')),
       {
         [Op.iLike]: `%${searchTerm}%`
       }
