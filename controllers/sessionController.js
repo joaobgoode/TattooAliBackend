@@ -46,7 +46,6 @@ const sessionController = {
     }
     const { data } = req.query;
     if (data) {
-      req.query.date = data;
       return await sessionController.getByDate(req, res);
     }
     try {
@@ -95,13 +94,13 @@ const sessionController = {
   async getByDate(req, res) {
     try {
       const usuario_id = req.user.id;
-      const date = req.date;
+      const { data } = req.query;
 
-      if (!date || isNaN(Date.parse(date))) {
+      if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
 
-      const sessions = await sessionService.getByDate(usuario_id, date);
+      const sessions = await sessionService.getByDate(usuario_id, data);
       res.json(sessions);
     } catch (error) {
       console.error('Erro ao obter sessões:', error);
@@ -230,8 +229,7 @@ const sessionController = {
   async getClientPendingSessions(req, res) {
     const { data } = req.query;
     if (data) {
-      req.query.date = data;
-      return await sessionController.getPendingSessionsByDate(req, res);
+      return await sessionController.getClientPendingSessionsByDate(req, res);
     }
     try {
       const usuario_id = req.user.id;
@@ -249,8 +247,7 @@ const sessionController = {
   async getClientRealizedSessions(req, res) {
     const { data } = req.query;
     if (data) {
-      req.query.date = data;
-      return await sessionController.getPendingSessionsByDate(req, res);
+      return await sessionController.getClientRealizedSessionsByDate(req, res);
     }
     try {
       const usuario_id = req.user.id;
@@ -268,8 +265,7 @@ const sessionController = {
   async getClientCanceledSessions(req, res) {
     const { data } = req.query;
     if (data) {
-      req.query.date = data;
-      return await sessionController.getPendingSessionsByDate(req, res);
+      return await sessionController.getClientCanceledSessionsByDate(req, res);
     }
     try {
       const usuario_id = req.user.id;
@@ -287,11 +283,11 @@ const sessionController = {
   async getPendingSessionsByDate(req, res) {
     try {
       const usuario_id = req.user.id;
-      const { date } = req.query;
-      if (!date || isNaN(Date.parse(date))) {
+      const { data } = req.query;
+      if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
-      const sessions = await sessionService.getPendingSessionsByDate(usuario_id, date);
+      const sessions = await sessionService.getPendingSessionsByDate(usuario_id, data);
       res.status(200).json(sessions);
     } catch (error) {
       res.status(500).json({ message: 'Erro interno do servidor' });
@@ -301,11 +297,11 @@ const sessionController = {
   async getRealizedSessionsByDate(req, res) {
     try {
       const usuario_id = req.user.id;
-      const { date } = req.query;
-      if (!date || isNaN(Date.parse(date))) {
+      const { data } = req.query;
+      if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
-      const sessions = await sessionService.getRealizedSessionsByDate(usuario_id, date);
+      const sessions = await sessionService.getRealizedSessionsByDate(usuario_id, data);
       res.status(200).json(sessions);
     } catch (error) {
       res.status(500).json({ message: 'Erro interno do servidor' });
@@ -315,11 +311,11 @@ const sessionController = {
   async getCanceledSessionsByDate(req, res) {
     try {
       const usuario_id = req.user.id;
-      const { date } = req.query;
-      if (!date || isNaN(Date.parse(date))) {
+      const { data } = req.query;
+      if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
-      const sessions = await sessionService.getCanceledSessionsByDate(usuario_id, date);
+      const sessions = await sessionService.getCanceledSessionsByDate(usuario_id, data);
       res.status(200).json(sessions);
     } catch (error) {
       res.status(500).json({ message: 'Erro interno do servidor' });
@@ -330,11 +326,11 @@ const sessionController = {
     try {
       const usuario_id = req.user.id;
       const { clienteId } = req.params;
-      const { date } = req.query;
-      if (!date || isNaN(Date.parse(date))) {
+      const { data } = req.query;
+      if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
-      const sessions = await sessionService.getClientPendingSessionsByDate(usuario_id, clienteId, date);
+      const sessions = await sessionService.getClientPendingSessionsByDate(usuario_id, clienteId, data);
       res.status(200).json(sessions);
     } catch (error) {
       res.status(500).json({ message: 'Erro interno do servidor' });
@@ -345,11 +341,11 @@ const sessionController = {
     try {
       const usuario_id = req.user.id;
       const { clienteId } = req.params;
-      const { date } = req.query;
-      if (!date || isNaN(Date.parse(date))) {
+      const { data } = req.query;
+      if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
-      const sessions = await sessionService.getClientRealizedSessionsByDate(usuario_id, clienteId, date);
+      const sessions = await sessionService.getClientRealizedSessionsByDate(usuario_id, clienteId, data);
       res.status(200).json(sessions);
     } catch (error) {
       res.status(500).json({ message: 'Erro interno do servidor' });
@@ -360,11 +356,11 @@ const sessionController = {
     try {
       const usuario_id = req.user.id;
       const { clienteId } = req.params;
-      const { date } = req.query;
-      if (!date || isNaN(Date.parse(date))) {
+      const { data } = req.query;
+      if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
-      const sessions = await sessionService.getClientCanceledSessionsByDate(usuario_id, clienteId, date);
+      const sessions = await sessionService.getClientCanceledSessionsByDate(usuario_id, clienteId, data);
       res.status(200).json(sessions);
     } catch (error) {
       res.status(500).json({ message: 'Erro interno do servidor' });
