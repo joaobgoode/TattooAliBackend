@@ -1,3 +1,9 @@
+const { createClient } = require('@supabase/supabase-js');
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 const perfilService = require('../services/perfilService');
 
 function validadeName(name) {
@@ -46,9 +52,19 @@ async function getPerfil(req, res) {
 }
 
 async function deletePerfil(req, res) {
-  const { id } = req.user;
+  const { id: user_id, sub: supabase_id } = req.user;
   try {
-    const perfil = await perfilService.deletePerfilById(id);
+    const perfil = await perfilService.deletePerfilById(user_id);
+
+    if (!supabase_id) {
+      return res.status(500).json({ message: "ID do Supabase não encontrado no token" });
+    }
+
+    const { error: authError } = await supabase.auth.admin.deleteUser(supabase_id);
+    if (authError) {
+      throw new Error(`Erro ao deletar usuário no Supabase Auth: ${authError.message}`);
+    }
+
     return res.status(200).json(perfil);
   } catch (error) {
     return res.status(400).json({ message: error.message });
@@ -62,7 +78,6 @@ async function updatePerfil(req, res) {
 
   if (req.file) {
     console.log("Arquivo de imagem recebido:", req.file);
-
   }
 
   if (dataPerfil.nome && !validadeName(dataPerfil.nome)) {
@@ -88,4 +103,4 @@ module.exports = {
   getPerfil,
   deletePerfil,
   updatePerfil
-};
+}
