@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.22.0",
+    "@supabase/supabase-js": "^2.76.1",
     "aws-sdk": "^2.1692.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
@@ -33,7 +34,8 @@
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.7",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "sequelize-cli": "^6.6.3"
