@@ -31,7 +31,7 @@ const Photo = sequelize.define('Photo', {
 // --- A PARTE MAIS IMPORTANTE ---
 // Define a relação: Uma Foto (Photo) pertence a um Usuário (User).
 // Isso criará automaticamente uma chave estrangeira 'usuario_id' na tabela de Photos.
-Photo.belongsTo(User, { foreignKey: 'user_Id', as: 'user_Id' });
+Photo.belongsTo(User, { foreignKey: 'user_Id', as: 'user' });
 
 // --- OPCIONAL, MAS RECOMENDADO ---
 // Você também pode adicionar a relação inversa no seu arquivo 'user.js'.
