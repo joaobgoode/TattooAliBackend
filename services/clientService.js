@@ -19,7 +19,7 @@ async function getByName(nome) {
     where: where(
       fn('unaccent', col('nome')),
       {
-        [Op.iLike]: `%${searchTerm}%`
+        [Op.iLike]: `%${nome}%`
       }
     )
   });
