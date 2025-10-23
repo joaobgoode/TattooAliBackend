@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { registerSchema, loginSchema } = require('../schemas/userSchema'); // Ajuste o caminho conforme a estrutura de pastas
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
@@ -7,23 +8,30 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const userService = require('../services/userService');
 
 async function register(req, res) {
-  const {
-    nome, sobrenome, cpf, email, senha, telefone
-  } = req.body;
-  if (!nome || !sobrenome || !cpf || !email || !senha) {
-    return res.status(400).json({ error: "Campos obrigatórios em branco" });
+
+  const validationResult = registerSchema.safeParse(req.body);
+
+  if (!validationResult.success) {
+    const errorMessages = validationResult.error.issues.map(issue =>
+      `${issue.path.join('.')}: ${issue.message}`
+    ).join('; ');
+    return res.status(400).json({ error: `Dados de registro inválidos: ${errorMessages}` });
   }
+
+  const { nome, sobrenome, cpf, email, senha, telefone } = validationResult.data;
+
   let supabaseUserId = null;
+
   try {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: email,
       password: senha,
       options: {
         data: {
-          nome: nome,
-          sobrenome: sobrenome,
-          cpf: cpf,
-          telefone: telefone,
+          nome,
+          sobrenome,
+          cpf,
+          telefone: telefone || null,
         }
       }
     });
@@ -35,15 +43,19 @@ async function register(req, res) {
     supabaseUserId = authData.user.id;
 
     const dataToCreate = {
-      nome: nome,
-      sobrenome: sobrenome,
-      cpf: cpf,
-      email: email,
+      nome,
+      sobrenome,
+      cpf,
+      email,
+      // A senha salva no DB local será um hash feito pelo hook do Sequelize, não a string "Senha nao utilizada"
+      // Aqui usamos "Senha não utilizada" apenas para satisfazer o campo NOT NULL do Sequelize
+      // no momento da criação, já que a autenticação principal será pelo Supabase.
       senha: "Senha nao utilizada",
     };
     if (telefone) {
       dataToCreate.telefone = telefone;
     }
+
     const createdUser = await userService.create(dataToCreate);
     const user_id_int = createdUser.user_id;
 
@@ -56,10 +68,10 @@ async function register(req, res) {
       {
         user_metadata: {
           user_id: user_id_int,
-          nome: nome,
-          sobrenome: sobrenome,
-          cpf: cpf,
-          telefone: telefone,
+          nome,
+          sobrenome,
+          cpf,
+          telefone: telefone || null,
         }
       }
     );
@@ -71,17 +83,30 @@ async function register(req, res) {
 
     return res.status(200).json({ message: "Usuário criado com sucesso, verifique seu e-mail para confirmar a conta" });
   } catch (error) {
+    // Se a criação no banco local falhar, é crucial tentar reverter a criação no Supabase Auth
+    if (supabaseUserId) {
+      // Tenta deletar o usuário criado no Supabase Auth para evitar orfãos
+      const { error: deleteError } = await supabase.auth.admin.deleteUser(supabaseUserId);
+      if (deleteError) {
+        console.error("Erro CRÍTICO ao tentar reverter o usuário no Supabase Auth:", deleteError.message);
+      }
+    }
     return res.status(500).json({ error: error.message });
   }
 }
 
 async function login(req, res) {
-  const {
-    email, senha
-  } = req.body;
-  if (!email || !senha) {
-    return res.status(400).json({ error: "Campos obrigatórios em branco" });
+
+  const validationResult = loginSchema.safeParse(req.body);
+
+  if (!validationResult.success) {
+    const errorMessages = validationResult.error.issues.map(issue =>
+      `${issue.path.join('.')}: ${issue.message}`
+    ).join('; ');
+    return res.status(400).json({ error: `Dados de login inválidos: ${errorMessages}` });
   }
+
+  const { email, senha } = validationResult.data;
 
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
