@@ -1,5 +1,24 @@
 const dashboardservice = require('../services/dashboardService');
 
+function formatResponse(sessoes) {
+  const sessoesFormatado = {
+    realizados: 0,
+    pendentes: 0
+  }
+
+  for (let entry of sessoes) {
+    const data = entry.dataValues
+    console.log(data)
+    if (data.realizado) {
+      sessoesFormatado.realizados += parseFloat(data.total) || 0
+    } else if (data.realizado == false) {
+      sessoesFormatado.pendentes += parseFloat(data.total) || 0
+    }
+  }
+
+  return sessoesFormatado
+}
+
 function validateDia(dia) {
   return /[0-3][0-9]/.test(dia);
 }
@@ -30,12 +49,12 @@ async function getSessionsOfDay(req, res) {
     if (!dia && !mes && !ano) {
       const data = getToday()
       const sessoes = await dashboardservice.totalSessionsOfDay(id, data.dia, data.mes, data.ano)
-      return res.status(200).json(sessoes)
+      return res.status(200).json(formatResponse(sessoes))
     }
 
     if (validateDia(dia) && validateMes(mes) && validateAno(ano)) {
       const sessoes = await dashboardservice.totalSessionsOfDay(id, dia, mes, ano)
-      return res.status(200).json(sessoes)
+      return res.status(200).json(formatResponse(sessoes))
     }
     return res.status(400).json({ message: "Bad Request" })
 
@@ -53,12 +72,12 @@ async function getSessionsOfMonth(req, res) {
     if (!mes && !ano) {
       const data = getToday()
       const sessoes = await dashboardservice.totalSessionsOfMonth(id, data.mes, data.ano)
-      return res.status(200).json(sessoes)
+      return res.status(200).json(formatResponse(sessoes))
     }
 
     if (validateMes(mes) && validateAno(ano)) {
       const sessoes = await dashboardservice.totalSessionsOfMonth(id, mes, ano)
-      return res.status(200).json(sessoes)
+      return res.status(200).json(formatResponse(sessoes))
     }
     return res.status(400).json({ message: "Bad Request" })
 
@@ -74,12 +93,12 @@ async function getSessionsOfYear(req, res) {
     if (!ano) {
       const data = getToday()
       const sessoes = await dashboardservice.totalSessionsOfYear(id, data.ano)
-      return res.status(200).json(sessoes)
+      return res.status(200).json(formatResponse(sessoes))
     }
 
     if (validateAno(ano)) {
       const sessoes = await dashboardservice.totalSessionsOfYear(id, ano)
-      return res.status(200).json(sessoes)
+      return res.status(200).json(formatResponse(sessoes))
     }
     return res.status(400).json({ message: "Bad Request" })
 
@@ -97,12 +116,12 @@ async function getSessionsValueOfDay(req, res) {
     if (!dia && !mes && !ano) {
       const data = getToday()
       const realizado = await dashboardservice.totalSessionsValueOfDay(id, data.dia, data.mes, data.ano)
-      return res.status(200).json(realizado)
+      return res.status(200).json(formatResponse(realizado))
     }
 
     if (validateDia(dia) && validateMes(mes) && validateAno(ano)) {
       const realizado = await dashboardservice.totalSessionsOfDay(id, dia, mes, ano)
-      return res.status(200).json(realizado)
+      return res.status(200).json(formatResponse(realizado))
     }
     return res.status(400).json({ message: "Bad Request" })
 
@@ -119,12 +138,12 @@ async function getSessionsValueOfMonth(req, res) {
     if (!mes && !ano) {
       const data = getToday()
       const realizado = await dashboardservice.totalSessionsValueOfMonth(id, data.mes, data.ano)
-      return res.status(200).json(realizado)
+      return res.status(200).json(formatResponse(realizado))
     }
 
     if (validateMes(mes) && validateAno(ano)) {
       const realizado = await dashboardservice.totalSessionsValueOfMonth(id, mes, ano)
-      return res.status(200).json(realizado)
+      return res.status(200).json(formatResponse(realizado))
     }
     return res.status(400).json({ message: "Bad Request" })
 
@@ -140,12 +159,12 @@ async function getSessionsValueOfYear(req, res) {
     if (!ano) {
       const data = getToday()
       const realizado = await dashboardservice.totalSessionsValueOfYear(id, data.ano)
-      return res.status(200).json(realizado)
+      return res.status(200).json(formatResponse(realizado))
     }
 
     if (validateAno(ano)) {
       const realizado = await dashboardservice.totalSessionsValueOfYear(id, ano)
-      return res.status(200).json(realizado)
+      return res.status(200).json(formatResponse(realizado))
     }
     return res.status(400).json({ message: "Bad Request" })
 
