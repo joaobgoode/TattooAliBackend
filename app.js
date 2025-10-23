@@ -57,7 +57,7 @@ app.use('/api/dashboard', dashboardRoutes);
 // AI
 app.use('/api/generate', generateRoutes);
 // Galeria
-app.use('/api/galeria', generateRoutes);
+app.use('/api/galeria', photoRoutes);
 
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(setupSwagger))
 module.exports = app;
