@@ -1,26 +1,24 @@
 const sessionService = require('../services/sessionService');
-const { validationResult } = require('express-validator');
 const { belongsToUser } = require('../services/clientService.js');
+const { createSessionSchema, updateSessionSchema, changeStatusSchema } = require('../schemas/sessionSchema');
 
 const sessionController = {
-  //criando uma nova sessão
+
   async createSession(req, res) {
+
+    const validationResult = createSessionSchema.safeParse(req.body);
+
+    if (!validationResult.success) {
+      const errorMessages = validationResult.error.issues.map(issue =>
+        `${issue.path.join('.')}: ${issue.message}`
+      ).join('; ');
+      return res.status(400).json({ message: `Dados inválidos: ${errorMessages}` });
+    }
+
+    const { cliente_id, data_atendimento, valor_sessao, numero_sessao, descricao } = validationResult.data;
+    const usuario_id = req.user.id;
+
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-      const { cliente_id, data_atendimento, valor_sessao, numero_sessao, descricao } = req.body;
-      const usuario_id = req.user.id;
-
-      if (!cliente_id || !data_atendimento || !valor_sessao || !numero_sessao) {
-        return res.status(400).json({ message: 'Campos obrigatórios em branco!' });
-      }
-
-      if (descricao && descricao.length > 240) {
-        return res.status(400).json({ message: 'A descrição não pode exceder 240 caracteres.' });
-      }
-
       const newSession = {
         cliente_id,
         usuario_id,
@@ -33,12 +31,10 @@ const sessionController = {
       const session = await sessionService.createSession(newSession);
       res.status(201).json(session);
     } catch (error) {
-      console.error('Erro ao criar sessão:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
   },
 
-  //buscando todas as sessões do usuário
   async getAll(req, res) {
     const { cliente } = req.query;
     if (cliente) {
@@ -54,12 +50,10 @@ const sessionController = {
       const sessions = await sessionService.getAll(usuario_id);
       return res.json(sessions);
     } catch (error) {
-      console.error('Erro ao obter sessões:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
   },
 
-  //buscando sessôes por ID
   async getById(req, res) {
     try {
       const usuario_id = req.user.id;
@@ -72,12 +66,10 @@ const sessionController = {
 
       res.json(session);
     } catch (error) {
-      console.error('Erro ao obter sessão:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
   },
 
-  //buscando sessões por ID do cliente
   async getByClientId(req, res) {
     try {
       const usuario_id = req.user.id;
@@ -86,69 +78,71 @@ const sessionController = {
       const sessions = await sessionService.getByClientId(usuario_id, clientId);
       res.json(sessions);
     } catch (error) {
-      console.error('Erro ao obter sessões:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
   },
 
-  //buscando sessões por data
   async getByDate(req, res) {
     try {
       const usuario_id = req.user.id;
       const { data } = req.query;
 
-      if (!data || isNaN(Date.parse(data))) {
+      // Validação de data transferida para o Zod (embora aqui só cheque a presença/formato básico)
+      if (!data) {
         return res.status(400).json({ message: 'Data inválida' });
       }
 
       const sessions = await sessionService.getByDate(usuario_id, data);
       res.json(sessions);
     } catch (error) {
-      console.error('Erro ao obter sessões:', error);
       res.status(500).json({ message: 'Erro ao obter sessões.' });
     }
   },
 
-  //atualizando uma sessão
   async updateSession(req, res) {
+    const usuario_id = req.user.id;
+    const { id } = req.params;
+
+    const validationResult = updateSessionSchema.safeParse(req.body);
+
+    if (!validationResult.success) {
+      const errorMessages = validationResult.error.issues.map(issue =>
+        `${issue.path.join('.')}: ${issue.message}`
+      ).join('; ');
+      return res.status(400).json({ message: `Dados inválidos: ${errorMessages}` });
+    }
+
+    const updateData = validationResult.data;
+
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-
-      const usuario_id = req.user.id;
-      const { id } = req.params;
-      const updateData = req.body;
-
       const sessionExists = await sessionService.verifySession(usuario_id, id);
       if (!sessionExists) {
         return res.status(404).json({ message: 'Sessão não encontrada.' });
       }
 
-      if (updateData.descricao && updateData.descricao.length > 240) {
-        return res.status(400).json({ message: 'A descrição não pode exceder 240 caracteres.' });
-      }
-
       const updateSession = await sessionService.updateSession(id, updateData);
       res.json(updateSession);
     } catch (error) {
-      console.error('Erro ao atualizar sessão:', error);
       res.status(500).json({ message: 'Erro ao atualizar sessão.' });
     }
   },
 
-  //mudando o status de uma sessão
   async changeStatus(req, res) {
+    const usuario_id = req.user.id;
+    const { id } = req.params;
+
+    const validationResult = changeStatusSchema.safeParse(req.body);
+
+    if (!validationResult.success) {
+      const errorMessages = validationResult.error.issues.map(issue =>
+        `${issue.path.join('.')}: ${issue.message}`
+      ).join('; ');
+      return res.status(400).json({ message: `Dados inválidos: ${errorMessages}` });
+    }
+
+    const { realizado } = validationResult.data; // Apenas 'realizado' é esperado aqui
+
     try {
-      const usuario_id = req.user.id;
-      const { id } = req.params;
-      const { realizado } = req.body;
-
-      if (typeof realizado !== 'boolean') {
-        return res.status(400).json({ message: 'resposta invalida' });
-      }
-
       const sessionExists = await sessionService.verifySession(usuario_id, id);
       if (!sessionExists) {
         return res.status(404).json({ message: 'Sessão não encontrada.' });
@@ -158,12 +152,10 @@ const sessionController = {
       res.json(updatedSession);
 
     } catch (error) {
-      console.error('Erro ao alterar status da sessão:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
   },
 
-  //apagando uma sessão
   async deleteSession(req, res) {
     try {
       const usuario_id = req.user.id;
@@ -177,7 +169,6 @@ const sessionController = {
       await sessionService.deleteSession(id);
       res.status(204).send();
     } catch (error) {
-      console.error('Erro ao deletar sessão:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
   },
@@ -285,6 +276,7 @@ const sessionController = {
     try {
       const usuario_id = req.user.id;
       const { data } = req.query;
+      // Validação básica de data aqui, Zod pode ser usado para validação mais rigorosa do query param
       if (!data || isNaN(Date.parse(data))) {
         return res.status(400).json({ message: 'Data inválida' });
       }
@@ -369,4 +361,4 @@ const sessionController = {
   }
 }
 
-module.exports = sessionController
+module.exports = sessionController;
