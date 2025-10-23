@@ -29,7 +29,7 @@ function validateMes(mes) {
 }
 
 function validateAno(ano) {
-  return /[0-9][0-9][0-9][0-9]/.test(dia);
+  return /[0-9][0-9][0-9][0-9]/.test(ano);
 }
 
 function getToday() {
@@ -120,7 +120,7 @@ async function getSessionsValueOfDay(req, res) {
     }
 
     if (validateDia(dia) && validateMes(mes) && validateAno(ano)) {
-      const realizado = await dashboardservice.totalSessionsOfDay(id, dia, mes, ano)
+      const realizado = await dashboardservice.totalSessionsValueOfDay(id, dia, mes, ano)
       return res.status(200).json(formatResponse(realizado))
     }
     return res.status(400).json({ message: "Bad Request" })
