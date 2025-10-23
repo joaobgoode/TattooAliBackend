@@ -1,5 +1,8 @@
 const z = require('zod');
-const dataAtendimentoSchema = z.string().datetime({ message: "Formato de data e hora inválido. Esperado ISO 8601 (ex: '2025-10-25T10:00:00')." });
+const dataAtendimentoSchema = z.string().regex(
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/,
+  "Formato de data e hora inválido. Esperado 'YYYY-MM-DDTHH:mm:ss'."
+);;
 const createSessionSchema = z.object({
   cliente_id: z.number().int({ message: "ID do cliente deve ser um número inteiro." }),
 
