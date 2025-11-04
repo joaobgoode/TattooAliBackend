@@ -6,6 +6,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const userService = require('../services/userService');
+const authService = require('../services/authService');
 
 async function register(req, res) {
 
@@ -124,4 +125,21 @@ async function login(req, res) {
   }
 }
 
-module.exports = { register, login };
+async function recoverPassword(req, res) {
+  try {
+    const { email, redirectTo } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email é obrigatório.' });
+    }
+
+    await authService.sendPasswordResetEmail(email, redirectTo);
+
+    return res.status(200).json({ message: 'Se houver uma conta com esse e-mail, você receberá instruções para recuperar a senha.' });
+  } catch (error) {
+    console.error('Erro ao solicitar recuperação de senha:', error.message || error);
+    return res.status(500).json({ error: 'Erro ao processar solicitação de recuperação de senha.' });
+  }
+}
+
+module.exports = { register, login, recoverPassword };
