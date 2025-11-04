@@ -127,11 +127,14 @@ async function login(req, res) {
 
 async function recoverPassword(req, res) {
   try {
-    const { email, redirectTo } = req.body;
+    const { email } = req.body;
 
     if (!email) {
       return res.status(400).json({ error: 'Email é obrigatório.' });
     }
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const redirectTo = `${frontendUrl}/reset-password`; 
 
     await authService.sendPasswordResetEmail(email, redirectTo);
 
@@ -142,4 +145,46 @@ async function recoverPassword(req, res) {
   }
 }
 
-module.exports = { register, login, recoverPassword };
+async function alterarSenha(req, res) {
+  try {
+    const { token, novaSenha } = req.body;
+
+    if (!token) {
+      return res.status(401).json({ error: 'Token de autenticação é obrigatório' });
+    }
+
+    if (!novaSenha) {
+      return res.status(400).json({ error: 'Nova senha é obrigatória' });
+    }
+
+    if (novaSenha.length < 6) {
+      return res.status(400).json({ error: 'A senha deve ter pelo menos 6 caracteres' });
+    }
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    if (userError || !user) {
+      return res.status(401).json({ error: 'Token inválido ou expirado' });
+    }
+
+    const { data, error } = await supabase.auth.admin.updateUserById(
+      user.id,
+      { password: novaSenha }
+    );
+
+    if (error) {
+      console.error('Erro ao atualizar senha:', error);
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.status(200).json({
+      message: 'Senha alterada com sucesso'
+    });
+
+  } catch (error) {
+    console.error('Erro interno no servidor:', error);
+    return res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+}
+
+module.exports = { register, login, recoverPassword, alterarSenha };
