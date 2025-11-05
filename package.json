@@ -16,7 +16,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test:client": "jest ./test/client.test.js"
   },
   "dependencies": {
     "@google/genai": "^1.22.0",
@@ -39,6 +40,8 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "sequelize-cli": "^6.6.3"
+    "jest": "^30.2.0",
+    "sequelize-cli": "^6.6.3",
+    "supertest": "^7.1.4"
   }
 }
