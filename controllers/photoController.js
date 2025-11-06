@@ -102,7 +102,7 @@ async function deletePhoto(req, res) {
 
 async function getUserPhotos(req, res) {
   try {
-    const id = req.body.user.id
+    const id = req.user.id
     const photos = await photoService.getPhotosByUserId(id);
     return res.status(200).json(photos);
   } catch (error) {
