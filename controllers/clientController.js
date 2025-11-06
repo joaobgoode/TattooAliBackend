@@ -69,7 +69,7 @@ async function getClientById(req, res) {
   try {
     const isOwner = await clientService.belongsToUser(id, user_id);
     if (!isOwner) {
-      return res.status(403).json({ error: "Acesso negado" });
+      return res.status(404).json({ error: "Cliente não encontrado ou não pertence ao usuario" });
     }
     const client = await clientService.getById(id);
     if (!client) {
@@ -94,7 +94,7 @@ async function updateClient(req, res) {
   try {
     const isOwner = await clientService.belongsToUser(id, user_id);
     if (!isOwner) {
-      return res.status(403).json({ error: "Acesso negado" });
+      return res.status(404).json({ error: "Cliente não encontrado ou não pertence ao usuario" });
     }
     const updated = await clientService.update(id, { nome, telefone, descricao, endereco });
     if (!updated) {
@@ -114,7 +114,7 @@ async function deleteClient(req, res) {
   try {
     const isOwner = await clientService.belongsToUser(id, user_id);
     if (!isOwner) {
-      return res.status(403).json({ error: "Acesso negado" });
+      return res.status(404).json({ error: "Cliente não encontrado ou não pertence ao usuario" });
     }
     const removed = await clientService.remove(id);
     if (!removed) {

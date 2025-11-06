@@ -17,6 +17,7 @@
   "scripts": {
     "test": "jest",
     "test:client:schema": "jest ./test/clientschema.test.js",
+    "test:client": "jest ./test/client.test.js"
     "start": "node server.js"
   },
   "dependencies": {
