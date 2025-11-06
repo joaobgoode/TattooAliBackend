@@ -15,11 +15,13 @@
   "type": "commonjs",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "node server.js",
-    "test:client": "jest ./test/client.test.js",
-    "test:session:schema": "jest ./test/sessionschema.test.js",
-    "test:user:schema": "jest ./test/userschema.test.js"
+    "test:client": "jest ./test/client.test.js --detectOpenHandles",
+    "test:session": "jest ./test/session.test.js --detectOpenHandles"
+    "test:client": "jest ./test/client.test.js --detectOpenHandles",
+    "test:session:schema": "jest ./test/sessionschema.test.js --detectOpenHandles",
+    "test:user:schema": "jest ./test/userschema.test.js --detectOpenHandles"
   },
   "dependencies": {
     "@google/genai": "^1.22.0",
