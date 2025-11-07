@@ -11,5 +11,6 @@ router.get('/', auth.authenticateToken, photoController.getUserPhotos);
 router.get('/photo/:id', photoController.getPhotoById);
 router.get('/user/:id', photoController.getPhotos);
 router.delete('/:id', auth.authenticateToken, photoController.deletePhoto);
+router.patch('/description/:id', auth.authenticateToken, photoController.updatePhotoDescription);
 
 module.exports = router;
