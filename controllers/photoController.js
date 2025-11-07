@@ -106,7 +106,28 @@ async function getUserPhotos(req, res) {
     const photos = await photoService.getPhotosByUserId(id);
     return res.status(200).json(photos);
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    console.error(error)
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+async function updatePhotoDescription(req, res) {
+  try {
+    const user_Id = req.user.id;
+    const photo_id = req.params.id;
+    const {descricao} = req.body;
+    const belongs = photoService.belongsToUser(user_Id, photo_id);
+    if (!belongs) {
+      return res.status(404).json({ message: 'Imagem não encontrada' });
+    }
+    const updated = await photoService.updatePhoto(photo_id, {descricao});
+    if (updated) {
+      return res.status(200).json(updated);
+    }
+    return res.status(500).json({message: "Não foi possivel mudar a descricao"});
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: error.message });
   }
 }
 
@@ -115,5 +136,6 @@ module.exports = {
     uploadPhoto,
     getPhotoById,
     getPhotos,
-    getUserPhotos
+    getUserPhotos,
+    updatePhotoDescription
 }

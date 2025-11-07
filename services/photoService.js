@@ -52,9 +52,23 @@ async function deletePhoto(id) {
   return true;
 }
 
+async function updatePhoto(id, data) {
+  const photo = await Photo.findByPk(id);
+  if (!photo) return null;
+  return await photo.update(data);
+}
+
+async function belongsToUser(user_Id, photo_id) {
+  const photo = await Photo.findOne({ where: { user_Id: user_Id, photo_id: photo_id} });
+    return !!photo
+}
+
+
 module.exports = {
   createPhoto,
   getPhotosByUserId,
   getPhotoById,
-  deletePhoto
+  deletePhoto,
+  updatePhoto,
+  belongsToUser
 };
