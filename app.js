@@ -14,7 +14,7 @@ const setupSwagger = require('./swagger.js')
 const swaggerUI = require('swagger-ui-express')
 const generateRoutes = require('./routes/generateRoutes.js')
 const photoRoutes = require('./routes/photoRoutes.js')
-const generatedImages = require('./routes/aiGallery.js')
+const generatedImages = require('./routes/aiGalleryRoutes.js')
 
 const allowedOrigins =
   process.env.NODE_ENV === "production"
