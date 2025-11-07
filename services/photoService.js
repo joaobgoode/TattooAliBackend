@@ -9,7 +9,7 @@ const Photo = require('../models/Photo.js');
  */
 async function createPhoto(photoData) {
   // Garante que os dados essenciais (url e usuario_id) foram passados
-  if (!photoData.url || !photoData.user_id) {
+  if (!photoData.url || !photoData.user_Id) {
     throw new Error('URL da foto e ID do usuário são obrigatórios.');
   }
   return await Photo.create(photoData);
@@ -23,7 +23,7 @@ async function createPhoto(photoData) {
 async function getPhotosByUserId(userId) {
   return await Photo.findAll({
     where: {
-      user_id: userId
+      user_Id: userId
     },
     order: [['createdAt', 'DESC']] // Opcional: ordena as fotos da mais nova para a mais antiga
   });

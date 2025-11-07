@@ -4,25 +4,25 @@ const BUCKET_PUB_URL = process.env.PUBLIC_BUCKET_URL;
 
 async function uploadPhoto(req, res) {
     try {
-        const image = req.image
+        const image = req.file
         
         if (!image){
             return res.status(304).json({mensagem: "Favor enviar uma imagem"})
         }
 
-        const dados = req.body.json ? JSON.parse(req.body.json) : {}
+        const dados = req.body ?? {};
 
         const id = req.user.id
 
-        const fileName = `${Date.now()}-${userId}-${req.file.originalname}`;
+        const fileName = `${Date.now()}-${id}-${req.file.originalname}`;
         const filePath = `galeria/${fileName}`;
         const fullpath = BUCKET_PUB_URL + "/" + filePath;
 
         await uploadFile(image, filePath)
 
         const imageBody = {
-            user_id: id,
-            url: fullpath,
+            user_Id: id,
+            url: filePath,
             ...dados
         }
 
@@ -75,7 +75,7 @@ async function deletePhoto(req, res) {
             return res.status(404).json({mensagem: "Imagem não encontrada"})
         }
 
-        const image_user_id = photo.user_id
+        const image_user_id = photo.user_Id
 
         if (image_user_id != user_id){
             return res.status(403).json({mensagem: "Sem permissão para deletar a imagem"})
@@ -91,7 +91,7 @@ async function deletePhoto(req, res) {
 
         await deleteFile(url)
 
-        return res.statuss(200).json({mensagem: "Imagem deletada"})
+        return res.status(200).json({mensagem: "Imagem deletada"})
 
 
     } catch (error) {

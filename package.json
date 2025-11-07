@@ -17,9 +17,8 @@
   "scripts": {
     "test": "jest",
     "test:client:schema": "jest ./test/clientschema.test.js",
-    "start": "node server.js"
-    "test:client": "jest ./test/client.test.js --detectOpenHandles",
-    "test:session": "jest ./test/session.test.js --detectOpenHandles"
+    "start": "node server.js",
+    "test:session": "jest ./test/session.test.js --detectOpenHandles",
     "test:client": "jest ./test/client.test.js --detectOpenHandles",
     "test:session:schema": "jest ./test/sessionschema.test.js --detectOpenHandles",
     "test:user:schema": "jest ./test/userschema.test.js --detectOpenHandles"
