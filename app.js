@@ -14,6 +14,7 @@ const setupSwagger = require('./swagger.js')
 const swaggerUI = require('swagger-ui-express')
 const generateRoutes = require('./routes/generateRoutes.js')
 const photoRoutes = require('./routes/photoRoutes.js')
+const generatedImages = require('./routes/aiGallery.js')
 
 const allowedOrigins =
   process.env.NODE_ENV === "production"
@@ -58,6 +59,8 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/generate', generateRoutes);
 // Galeria
 app.use('/api/galeria', photoRoutes);
+// Galeria de Ia
+app.use('/api/galeria-ia', generatedImages);
 
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(setupSwagger))
 module.exports = app;
