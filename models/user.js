@@ -50,6 +50,12 @@ const User = sequelize.define('User', {
     validate: {
       len: [8, 100] 
     }
+  },
+
+  role: {
+    type: DataTypes.ENUM('cliente', 'tatuador', 'admin'),
+    allowNull: false,
+    defaultValue: 'tatuador'
   }
 });
 

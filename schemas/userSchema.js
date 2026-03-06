@@ -57,6 +57,8 @@ const userSchema = z.object({
     invalid_type_error: "Senha deve ser uma string",
   }).min(8, { message: "Senha deve ter no mínimo 8 caracteres" })
     .max(100, { message: "Senha deve ter no máximo 100 caracteres" }),
+
+  role: z.enum(['cliente', 'tatuador']).default('tatuador')
 });
 
 const registerSchema = z.object({
