@@ -1,7 +1,7 @@
 const express = require('express');
 const auth = require('../authentication/auth.js');
 const sessionController = require('../controllers/sessionController');
-
+const { isTatuador} = require('../authentication/authCheckRole.js');
 const router = express.Router();
 /**
  * @swagger
@@ -181,27 +181,27 @@ const router = express.Router();
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get('/', auth.authenticateToken, sessionController.getAll);
-router.get('/pendentes', auth.authenticateToken, sessionController.getPendingSessions);
-router.get('/realizadas', auth.authenticateToken, sessionController.getRealizedSessions);
-router.get('/canceladas', auth.authenticateToken, sessionController.getCanceledSessions);
+router.get('/', auth.authenticateToken, isTatuador, sessionController.getAll);
+router.get('/pendentes', auth.authenticateToken, isTatuador, sessionController.getPendingSessions);
+router.get('/realizadas', auth.authenticateToken, isTatuador, sessionController.getRealizedSessions);
+router.get('/canceladas', auth.authenticateToken, isTatuador, sessionController.getCanceledSessions);
 
 // Rotas para filtros por data (devem vir antes de /:id)
-router.get('/pendentes/data', auth.authenticateToken, sessionController.getPendingSessionsByDate);
-router.get('/realizadas/data', auth.authenticateToken, sessionController.getRealizedSessionsByDate);
-router.get('/canceladas/data', auth.authenticateToken, sessionController.getCanceledSessionsByDate);
+router.get('/pendentes/data', auth.authenticateToken, isTatuador, sessionController.getPendingSessionsByDate);
+router.get('/realizadas/data', auth.authenticateToken, isTatuador, sessionController.getRealizedSessionsByDate);
+router.get('/canceladas/data', auth.authenticateToken, isTatuador, sessionController.getCanceledSessionsByDate);
 
-router.get('/cliente/:clienteId/pendentes', auth.authenticateToken, sessionController.getClientPendingSessions);
-router.get('/cliente/:clienteId/realizadas', auth.authenticateToken, sessionController.getClientRealizedSessions);
-router.get('/cliente/:clienteId/canceladas', auth.authenticateToken, sessionController.getClientCanceledSessions);
+router.get('/cliente/:clienteId/pendentes', auth.authenticateToken, isTatuador, sessionController.getClientPendingSessions);
+router.get('/cliente/:clienteId/realizadas', auth.authenticateToken, isTatuador, sessionController.getClientRealizedSessions);
+router.get('/cliente/:clienteId/canceladas', auth.authenticateToken, isTatuador, sessionController.getClientCanceledSessions);
 
 // Rotas para filtros por cliente e data
-router.get('/cliente/:clienteId/pendentes/data', auth.authenticateToken, sessionController.getClientPendingSessionsByDate);
-router.get('/cliente/:clienteId/realizadas/data', auth.authenticateToken, sessionController.getClientRealizedSessionsByDate);
-router.get('/cliente/:clienteId/canceladas/data', auth.authenticateToken, sessionController.getClientCanceledSessionsByDate);
+router.get('/cliente/:clienteId/pendentes/data', auth.authenticateToken, isTatuador, sessionController.getClientPendingSessionsByDate);
+router.get('/cliente/:clienteId/realizadas/data', auth.authenticateToken, isTatuador, sessionController.getClientRealizedSessionsByDate);
+router.get('/cliente/:clienteId/canceladas/data', auth.authenticateToken, isTatuador, sessionController.getClientCanceledSessionsByDate);
 
 // Rota para buscar sessão por ID (deve vir por último para evitar conflitos)
-router.get('/:id', auth.authenticateToken, sessionController.getById);
+router.get('/:id', auth.authenticateToken, isTatuador, sessionController.getById);
 
 /**
  * @swagger
@@ -262,7 +262,7 @@ router.get('/:id', auth.authenticateToken, sessionController.getById);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post('/', auth.authenticateToken, sessionController.createSession);
+router.post('/', auth.authenticateToken, isTatuador, sessionController.createSession);
 
 /**
  * @swagger
@@ -302,7 +302,7 @@ router.post('/', auth.authenticateToken, sessionController.createSession);
  *                   type: string
  *                   example: Erro ao atualizar sessão.
  */
-router.put('/:id', auth.authenticateToken, sessionController.updateSession);
+router.put('/:id', auth.authenticateToken, isTatuador, sessionController.updateSession);
 
 /**
  * @swagger
@@ -342,7 +342,7 @@ router.put('/:id', auth.authenticateToken, sessionController.updateSession);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.put('/realizar/:id', auth.authenticateToken, sessionController.changeStatus);
+router.put('/realizar/:id', auth.authenticateToken, isTatuador, sessionController.changeStatus);
 
 /**
  * @swagger
@@ -362,7 +362,7 @@ router.put('/realizar/:id', auth.authenticateToken, sessionController.changeStat
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.delete('/:id', auth.authenticateToken, sessionController.deleteSession);
+router.delete('/:id', auth.authenticateToken, isTatuador, sessionController.deleteSession);
 
 module.exports = router;
 
