@@ -24,6 +24,26 @@ const Client = sequelize.define('Client', {
     validate: {
       len: [0, 255]
     }
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true
+    }
+  },
+  senha: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      len: [8, 100] 
+    }
+  },
+  cpf:{
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
   }
 });
 

@@ -126,10 +126,20 @@ async function deleteClient(req, res) {
   }
 }
 
+async function registerNewClient(req, res) {
+  try {
+    const client = await clientService.registerClient(req.body);
+    res.status(201).json(client);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
 module.exports = {
   createClient,
   getClients,
   getClientById,
   updateClient,
-  deleteClient
+  deleteClient,
+  registerNewClient
 };
