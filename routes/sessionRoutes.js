@@ -1,7 +1,7 @@
 const express = require('express');
 const auth = require('../authentication/auth.js');
 const sessionController = require('../controllers/sessionController');
-const { isTatuador} = require('../authentication/authCheckRole.js');
+const { isTatuador, isCliente} = require('../authentication/authCheckRole.js');
 const router = express.Router();
 /**
  * @swagger
@@ -202,6 +202,8 @@ router.get('/cliente/:clienteId/canceladas/data', auth.authenticateToken, isTatu
 
 // Rota para buscar sessão por ID (deve vir por último para evitar conflitos)
 router.get('/:id', auth.authenticateToken, isTatuador, sessionController.getById);
+
+
 
 /**
  * @swagger

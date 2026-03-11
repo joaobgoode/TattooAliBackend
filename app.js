@@ -5,6 +5,7 @@ const userRoutes = require('./routes/userRoutes.js');
 const perfilRoutes = require('./routes/perfilRoutes.js');
 const imageRoutes = require('./routes/imageRoutes.js');
 const sessionRoutes = require('./routes/sessionRoutes.js');
+const sessionClienteRoutes = require('./routes/sessionClienteRoutes.js');
 const cors = require('cors');
 const clientRoutes = require('./routes/clientRoutes.js')
 const dashboardRoutes = require('./routes/dashboardRoutes.js')
@@ -61,6 +62,9 @@ app.use('/api/generate', generateRoutes);
 app.use('/api/galeria', photoRoutes);
 // Galeria de Ia
 app.use('/api/galeria-ia', generatedImages);
+
+//Mobile
+app.use('/api/mobile/sessions', sessionClienteRoutes)
 
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(setupSwagger))
 module.exports = app;

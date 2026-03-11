@@ -195,6 +195,102 @@ async function getClientCanceledSessionsByDate(userId, clientId, date) {
   });
 }
 
+async function getClientSessionsByCPF(cpf) {
+    return await Session.findAll({
+      include: [
+        {
+          model: Client,
+          where: { cpf: cpf },
+          attributes: ["client_id", "cpf", "name"]
+        },
+        {
+          model: User,
+          as: "tatuador",
+          attributes: ["user_id", "name", "email"]
+        }
+      ]
+    });
+}
+
+async function getClientSessionsToday(cpf) {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  return await Session.findAll({
+    where: {
+      date: {
+        [Op.gte]: today,
+        [Op.lt]: tomorrow
+      }
+    },
+    include: [
+      {
+        model: Client,
+        where: { cpf },
+        attributes: ["client_id", "cpf", "name"]
+      },
+      {
+        model: User,
+        as: "tatuador",
+        attributes: ["user_id", "name", "email"]
+      }
+    ]
+  });
+}
+
+async function getClientSessionsPast(cpf) {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  return await Session.findAll({
+    where: {
+      date: {
+        [Op.lt]: today
+      }
+    },
+    include: [
+      {
+        model: Client,
+        where: { cpf },
+        attributes: ["client_id", "cpf", "name"]
+      },
+      {
+        model: User,
+        as: "tatuador",
+        attributes: ["user_id", "name", "email"]
+      }
+    ]
+  });
+}
+
+async function getClientSessionsFuture(cpf) {
+  const today = new Date();
+  today.setHours(23,59,59,999);
+
+  return await Session.findAll({
+    where: {
+      date: {
+        [Op.gt]: today
+      }
+    },
+    include: [
+      {
+        model: Client,
+        where: { cpf },
+        attributes: ["client_id", "cpf", "name"]
+      },
+      {
+        model: User,
+        as: "tatuador",
+        attributes: ["user_id", "name", "email"]
+      }
+    ]
+  });
+}
+
 module.exports = {
   verifySession,
   getAll,
@@ -216,5 +312,9 @@ module.exports = {
   getCanceledSessionsByDate,
   getClientPendingSessionsByDate,
   getClientRealizedSessionsByDate,
-  getClientCanceledSessionsByDate
+  getClientCanceledSessionsByDate,
+  getClientSessionsByCPF,
+  getClientSessionsFuture,
+  getClientSessionsPast,
+  getClientSessionsToday
 };
