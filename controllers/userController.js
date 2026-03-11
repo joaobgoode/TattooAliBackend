@@ -19,7 +19,7 @@ async function register(req, res) {
     return res.status(400).json({ error: `Dados de registro inválidos: ${errorMessages}` });
   }
 
-  const { nome, sobrenome, cpf, email, senha, telefone } = validationResult.data;
+  const { nome, sobrenome, cpf, email, senha, telefone, role } = validationResult.data;
 
   let supabaseUserId = null;
 
@@ -33,6 +33,7 @@ async function register(req, res) {
           sobrenome,
           cpf,
           telefone: telefone || null,
+          role: role
         }
       }
     });
@@ -52,6 +53,7 @@ async function register(req, res) {
       // Aqui usamos "Senha não utilizada" apenas para satisfazer o campo NOT NULL do Sequelize
       // no momento da criação, já que a autenticação principal será pelo Supabase.
       senha: "Senha nao utilizada",
+      role: role || 'tatuador'
     };
     if (telefone) {
       dataToCreate.telefone = telefone;
@@ -73,6 +75,7 @@ async function register(req, res) {
           sobrenome,
           cpf,
           telefone: telefone || null,
+          role: role || 'tatuador'
         }
       }
     );
@@ -82,7 +85,7 @@ async function register(req, res) {
       return res.status(500).json({ error: "Erro na finalização do registro. Tente novamente." });
     }
 
-    return res.status(200).json({ message: "Usuário criado com sucesso, verifique seu e-mail para confirmar a conta" });
+    return res.status(200).json({ message: "Usuário criado com sucesso, verifique seu e-mail para confirmar a conta", role: role || 'tatuador' });
   } catch (error) {
     // Se a criação no banco local falhar, é crucial tentar reverter a criação no Supabase Auth
     if (supabaseUserId) {

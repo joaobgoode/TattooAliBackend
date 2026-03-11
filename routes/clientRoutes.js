@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const clientController = require('../controllers/clientController.js');
 const auth = require('../authentication/auth.js');
+const { isTatuador} = require('../authentication/authCheckRole.js');
 console.log(clientController)
 /**
  * @swagger
@@ -177,7 +178,7 @@ console.log(clientController)
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  */
-router.get('/', auth.authenticateToken, clientController.getClients);
+router.get('/', auth.authenticateToken, isTatuador, clientController.getClients);
 
 /**
  * @swagger
@@ -203,7 +204,7 @@ router.get('/', auth.authenticateToken, clientController.getClients);
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  */
-router.get('/:id', auth.authenticateToken, clientController.getClientById);
+router.get('/:id', auth.authenticateToken, isTatuador, clientController.getClientById);
 
 /**
  * @swagger
@@ -235,7 +236,7 @@ router.get('/:id', auth.authenticateToken, clientController.getClientById);
  *                 - $ref: '#/components/responses/ValidationError'
  *                 - $ref: '#/components/responses/BadRequestError'
  */
-router.post('/', auth.authenticateToken, clientController.createClient);
+router.post('/', auth.authenticateToken, isTatuador, clientController.createClient);
 
 /**
  * @swagger
@@ -267,7 +268,7 @@ router.post('/', auth.authenticateToken, clientController.createClient);
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
  */
-router.put('/:id', auth.authenticateToken, clientController.updateClient);
+router.put('/:id', auth.authenticateToken, isTatuador, clientController.updateClient);
 
 /**
  * @swagger
@@ -297,6 +298,6 @@ router.put('/:id', auth.authenticateToken, clientController.updateClient);
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  */
-router.delete('/:id', auth.authenticateToken, clientController.deleteClient);
+router.delete('/:id', auth.authenticateToken, isTatuador, clientController.deleteClient);
 
 module.exports = router;
