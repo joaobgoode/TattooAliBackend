@@ -358,7 +358,47 @@ const sessionController = {
     } catch (error) {
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
+  },
+  
+  async getClientSessionsByCPF(req, res) {
+    try {
+      const cpf = req.user.cpf;
+      const sessions = await sessionService.getClientSessionsByCPF(usuario_id, clienteId, data);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+  async getClientSessionsFuture(req, res) {
+    try {
+      const cpf = req.user.cpf;
+      const sessions = await sessionService.getClientSessionsByCPF(cpf);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+  async getClientSessionsPast(req, res) {
+    try {
+      const cpf = req.user.cpf;
+      const sessions = await sessionService.getClientSessionsByCPF(cpf);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  },
+  async getClientSessionsToday(req, res) {
+    try {
+      const cpf = req.user.cpf;
+      const sessions = await sessionService.getClientSessionsByCPF(cpf);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
   }
+
 }
+
+
 
 module.exports = sessionController;
