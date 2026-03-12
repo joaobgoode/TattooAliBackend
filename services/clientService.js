@@ -1,6 +1,7 @@
 const Client = require('../models/Client.js');
 const { Op, fn, col, where } = require('sequelize');
-
+const { cpf } = require('cpf-cnpj-validator');
+const bcrypt = require('bcrypt');
 
 async function create(data) {
   return await Client.create(data);
@@ -49,6 +50,37 @@ async function belongsToUser(clientId, userId) {
   return client.user_id === userId;
 }
 
+async function registerClient({ nome, email, senha, cpf: clientCpf, user_id}){
+  if(!cpf.isValid(clientCpf)){
+    throw new Error('CPF inválido');
+  }
+
+  const existingClient = await Client.findOne({
+    where: {
+      [Op.or]: [
+        {email: email},
+        {cpf: clientCpf}
+      ]
+    }
+  });
+
+  if (existingClient){
+    throw new Error ('Email ou CPF já cadastrado');
+  }
+
+  const hashedPassword = await bcrypt.hash(senha, 10);
+
+  const newClient = await Client.create({
+    nome,
+    email,
+    senha: hashedPassword,
+    cpf: clientCpf,
+    user_id
+  });
+
+  return newClient;                                             
+}
+
 module.exports = {
   create,
   getAll,
@@ -57,5 +89,6 @@ module.exports = {
   update,
   remove,
   getByPhone,
-  belongsToUser
+  belongsToUser,
+  registerClient
 };
