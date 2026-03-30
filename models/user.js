@@ -28,7 +28,7 @@ const User = sequelize.define('User', {
   telefone: DataTypes.STRING,
   whatsapp: DataTypes.STRING,
   instagram: DataTypes.STRING,
-  
+
   foto: {
     type: DataTypes.STRING,
     get() {
@@ -36,7 +36,7 @@ const User = sequelize.define('User', {
       return rawValue ? `${process.env.PUBLIC_BUCKET_URL}/${rawValue}` : null;
     }
   },
-  
+
   email: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -49,7 +49,7 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
-      len: [8, 100] 
+      len: [8, 100]
     }
   },
 

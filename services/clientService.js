@@ -50,22 +50,22 @@ async function belongsToUser(clientId, userId) {
   return client.user_id === userId;
 }
 
-async function registerClient({ nome, email, senha, cpf: clientCpf, user_id}){
-  if(!cpf.isValid(clientCpf)){
+async function registerClient({ nome, email, senha, cpf: clientCpf, user_id }) {
+  if (!cpf.isValid(clientCpf)) {
     throw new Error('CPF inválido');
   }
 
   const existingClient = await Client.findOne({
     where: {
       [Op.or]: [
-        {email: email},
-        {cpf: clientCpf}
+        { email: email },
+        { cpf: clientCpf }
       ]
     }
   });
 
-  if (existingClient){
-    throw new Error ('Email ou CPF já cadastrado');
+  if (existingClient) {
+    throw new Error('Email ou CPF já cadastrado');
   }
 
   const hashedPassword = await bcrypt.hash(senha, 10);
@@ -78,7 +78,7 @@ async function registerClient({ nome, email, senha, cpf: clientCpf, user_id}){
     user_id
   });
 
-  return newClient;                                             
+  return newClient;
 }
 
 module.exports = {
