@@ -90,6 +90,8 @@ const registerSchema = z.object({
   }).min(8, { message: "Senha deve ter no mínimo 8 caracteres" })
     .max(100, { message: "Senha deve ter no máximo 100 caracteres" }),
 
+  role: z.enum(['tatuador', 'cliente']),
+
   telefone: z.string({
     invalid_type_error: "Telefone deve ser uma string",
   }).regex(phoneRegex, { message: "Telefone inválido. Deve ter entre 9 e 11 dígitos numéricos." })
