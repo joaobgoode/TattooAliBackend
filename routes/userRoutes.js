@@ -8,4 +8,5 @@ router.post('/recuperar-senha', userController.recoverPassword);
 router.post('/alterar-senha', userController.alterarSenha);
 
 
+
 module.exports = router;
