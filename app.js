@@ -22,7 +22,15 @@ const tatuadorRoutes = require('./routes/tatuadorRoutes.js')
 const allowedOrigins =
   process.env.NODE_ENV === "production"
     ? [process.env.FRONTEND_URL]
-    : ["http://localhost:5173", "http://127.0.0.1:5173"];
+  : [
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "http://localhost:8081",
+      "http://127.0.0.1:8081",
+      "http://10.0.2.2:8081", // Android emulador
+      "exp://127.0.0.1:8081", // Expo
+      "exp://localhost:8081"
+    ];
 
 app.use(
   cors({

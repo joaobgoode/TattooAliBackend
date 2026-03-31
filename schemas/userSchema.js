@@ -92,7 +92,6 @@ const registerSchema = z.object({
 
   role: z.enum(['tatuador', 'cliente']),
   bairro: z.string().optional(),
-
   telefone: z.string({
     invalid_type_error: "Telefone deve ser uma string",
   }).regex(phoneRegex, { message: "Telefone inválido. Deve ter entre 9 e 11 dígitos numéricos." })

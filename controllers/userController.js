@@ -190,4 +190,6 @@ async function alterarSenha(req, res) {
   }
 }
 
-module.exports = { register, login, recoverPassword, alterarSenha };
+
+
+module.exports = { register, login, recoverPassword, alterarSenha, getTatuadores };
