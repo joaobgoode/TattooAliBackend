@@ -190,27 +190,6 @@ async function alterarSenha(req, res) {
   }
 }
 
-async function getTatuadores(req, res) {
-  try {
-    const { q, style } = req.query;
-    let where = { role: { [require('sequelize').Sequelize.Op.ne]: 'cliente' } };
 
-    if (q) {
-      where[require('sequelize').Sequelize.Op.or] = [
-        { nome: { [require('sequelize').Sequelize.Op.iLike]: `%${q}%` } },
-        { sobrenome: { [require('sequelize').Sequelize.Op.iLike]: `%${q}%` } },
-        { endereco: { [require('sequelize').Sequelize.Op.iLike]: `%${q}%` } },
-      ];
-    }
-
-    const include = style ? [{ model: Style, where: { nome: style }, required: true }] : [Style];
-
-    const tatuadores = await User.findAll({ where, include });
-    return res.status(200).json(tatuadores);
-  } catch (error) {
-    console.error(error);
-    return res.status(400).json({ message: error.message });
-  }
-}
 
 module.exports = { register, login, recoverPassword, alterarSenha, getTatuadores };
