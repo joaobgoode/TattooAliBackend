@@ -25,6 +25,7 @@ const User = sequelize.define('User', {
     unique: true
   },
   endereco: DataTypes.STRING,
+  bairro_id: DataTypes.INTEGER,
   telefone: DataTypes.STRING,
   whatsapp: DataTypes.STRING,
   instagram: DataTypes.STRING,

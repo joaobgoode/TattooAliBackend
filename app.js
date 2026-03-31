@@ -16,6 +16,8 @@ const swaggerUI = require('swagger-ui-express')
 const generateRoutes = require('./routes/generateRoutes.js')
 const photoRoutes = require('./routes/photoRoutes.js')
 const generatedImages = require('./routes/aiGalleryRoutes.js')
+const bairroRoutes = require('./routes/bairroRoutes.js')
+const tatuadorRoutes = require('./routes/tatuadorRoutes.js')
 
 const allowedOrigins =
   process.env.NODE_ENV === "production"
@@ -65,6 +67,9 @@ app.use('/api/galeria-ia', generatedImages);
 
 //Mobile
 app.use('/api/mobile/sessions', sessionClienteRoutes)
+
+app.use('/api/bairro', bairroRoutes)
+app.use('/api/tatuador', tatuadorRoutes)
 
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(setupSwagger))
 module.exports = app;
