@@ -2,7 +2,7 @@ const reviewService = require("../services/reviewService");
 const clientService = require("../services/clientService");
 
 function validarNota(nota) {
-  return typeof nota === "int" && nota > 0 && nota <= 5;
+  return typeof nota === "number" && nota > 0 && nota <= 5;
 }
 
 function validarComentario(comentario) {
@@ -78,4 +78,12 @@ async function updateReview(req, res) {
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
+}
+
+
+module.exports = {
+  postReview,
+  getReviews,
+  updateReview,
+  deleteReview
 }
