@@ -4,6 +4,7 @@ const tatuadorController = require('../controllers/tatuadorController.js');
 
 const router = express.Router();
 
+router.get('/search', auth.authenticateToken, tatuadorController.searchTatuadores);
 router.get('/bairro/:bairro_id', auth.authenticateToken, tatuadorController.getByBairro);
 router.get('/:user_id/photos', auth.authenticateToken, tatuadorController.getUserPhotos);
 router.get('/:user_id/styles', auth.authenticateToken, tatuadorController.getUserStyles);
