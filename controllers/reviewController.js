@@ -1,8 +1,22 @@
 const reviewService = require("../services/reviewService");
-const clientService = require("../services/clientService");
+const sessionService = require("../services/sessionService");
+const User = require("../models/user.js");
+
+async function cpfFromAuthenticatedUser(req) {
+  const fromMiddleware = req.userData?.cpf;
+  const midDigits = String(fromMiddleware || "").replace(/\D/g, "");
+  if (midDigits.length === 11) {
+    return fromMiddleware;
+  }
+  const id = req.user?.id;
+  if (!id) return null;
+  const row = await User.findByPk(id, { attributes: ["cpf"] });
+  return row?.cpf ?? null;
+}
 
 function validarNota(nota) {
-  return typeof nota === "number" && nota > 0 && nota <= 5;
+  const n = Number(nota);
+  return Number.isInteger(n) && n >= 1 && n <= 5;
 }
 
 function validarComentario(comentario) {
@@ -10,21 +24,42 @@ function validarComentario(comentario) {
 }
 
 async function postReview(req, res) {
-  const { data_sessao, nota, comentario } = req.body;
+  const sessao_id = Number.parseInt(String(req.body.sessao_id), 10);
+  const nota = Number(req.body.nota);
+  const comentario =
+    req.body.comentario == null ? "" : String(req.body.comentario);
 
-  if (!comentario) {
-    return res.status(400).json({ error: "Campo obrigatório em branco" });
+  if (!Number.isFinite(sessao_id) || sessao_id < 1) {
+    return res.status(400).json({ error: "sessao_id inválido" });
   }
 
   if (!validarNota(nota) || !validarComentario(comentario)) {
     return res.status(400).json({ error: "Campos inválidos" });
   }
 
-  const client_id = req.user.id;
-
   try {
-    const novaAnalise = { data_sessao, nota, comentario, client_id };
-    const analiseRegistro = await reviewService.postReview(novaAnalise);
+    const cpf = await cpfFromAuthenticatedUser(req);
+    if (String(cpf || "").replace(/\D/g, "").length !== 11) {
+      return res.status(400).json({ error: "CPF não encontrado no cadastro." });
+    }
+
+    const session = await sessionService.getSessaoByIdForClienteCpf(
+      sessao_id,
+      cpf
+    );
+    if (!session) {
+      return res.status(404).json({ error: "Sessão não encontrada." });
+    }
+    if (!session.realizado || session.cancelado) {
+      return res
+        .status(400)
+        .json({ error: "Só é possível avaliar sessões concluídas." });
+    }
+
+    const analiseRegistro = await reviewService.createFromValidatedSession(
+      session,
+      { nota, comentario }
+    );
     return res.status(201).json(analiseRegistro);
   } catch (error) {
     return res.status(400).json({ error: error.message });
@@ -33,8 +68,11 @@ async function postReview(req, res) {
 
 async function getReviews(req, res) {
   try {
-    const client_id = req.user.id;
-    const reviews = await reviewService.getAll(client_id);
+    const cpf = await cpfFromAuthenticatedUser(req);
+    if (String(cpf || "").replace(/\D/g, "").length !== 11) {
+      return res.status(400).json({ error: "CPF não encontrado no cadastro." });
+    }
+    const reviews = await reviewService.getAllByClienteCpf(cpf);
     return res.status(200).json(reviews);
   } catch (error) {
     return res.status(400).json({ error: error.message });
@@ -45,9 +83,13 @@ async function deleteReview(req, res) {
   const { id } = req.params;
 
   try {
-    const removed = await reviewService.deleteReview(id);
+    const cpf = await cpfFromAuthenticatedUser(req);
+    if (String(cpf || "").replace(/\D/g, "").length !== 11) {
+      return res.status(400).json({ error: "CPF não encontrado no cadastro." });
+    }
+    const removed = await reviewService.deleteReview(id, cpf);
     if (!removed) {
-      return res.status(404).json({ error: "Análise não encontrado" });
+      return res.status(404).json({ error: "Análise não encontrada" });
     }
     return res.status(200).json({ message: "Análise removido com sucesso" });
   } catch (error) {
@@ -58,20 +100,24 @@ async function deleteReview(req, res) {
 async function updateReview(req, res) {
   const { id } = req.params;
   const { nota, comentario } = req.body;
-  const client_id = req.user.id;
+
+  if (nota !== undefined && !validarNota(nota)) {
+    return res.status(400).json({ error: "Nota inválida" });
+  }
+  if (comentario !== undefined && !validarComentario(comentario)) {
+    return res.status(400).json({ error: "Comentário inválido" });
+  }
 
   try {
-    const isOwner = await clientService.belongsToUser(id, client_id);
-    if (!isOwner) {
-      return res
-        .status(404)
-        .json({ error: "Cliente não encontrado ou não pertence ao usuario" });
+    const cpf = await cpfFromAuthenticatedUser(req);
+    if (String(cpf || "").replace(/\D/g, "").length !== 11) {
+      return res.status(400).json({ error: "CPF não encontrado no cadastro." });
     }
-    const updatedReview = await reviewService.updateReview(id, {
-      nota,
-      comentario,
-    });
-    if (!updated) {
+    const patch = {};
+    if (nota !== undefined) patch.nota = nota;
+    if (comentario !== undefined) patch.comentario = comentario;
+    const updatedReview = await reviewService.updateReview(id, cpf, patch);
+    if (!updatedReview) {
       return res.status(404).json({ error: "Análise não encontrada" });
     }
     return res.status(200).json(updatedReview);
@@ -80,10 +126,9 @@ async function updateReview(req, res) {
   }
 }
 
-
 module.exports = {
   postReview,
   getReviews,
   updateReview,
-  deleteReview
-}
+  deleteReview,
+};
