@@ -7,6 +7,74 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const userService = require('../services/userService');
 const authService = require('../services/authService');
+const User = require('../models/user.js');
+const Client = require('../models/Client.js');
+
+async function getMe(req, res) {
+  try {
+    const id = req.user?.id;
+    if (!id) {
+      return res.status(401).json({ error: 'Não autenticado.' });
+    }
+    const row = await User.findByPk(id, {
+      attributes: [
+        'user_id',
+        'nome',
+        'sobrenome',
+        'email',
+        'role',
+        'cpf',
+        'telefone',
+        'data_nascimento',
+        'genero',
+        'cidade',
+        'uf',
+        'estilo_favorito',
+        'endereco',
+        'bio',
+      ],
+    });
+    if (!row) {
+      return res.status(404).json({ message: 'Usuário não encontrado.' });
+    }
+    const j = row.toJSON();
+    if (j.role === 'cliente') {
+      const cCpf = String(j.cpf || '').replace(/\D/g, '');
+      if (cCpf.length === 11) {
+        const cRow = await Client.findOne({
+          where: { cpf: cCpf },
+          attributes: ['descricao', 'endereco'],
+        });
+        if (cRow) {
+          if (!String(j.bio || '').trim() && String(cRow.descricao || '').trim()) {
+            j.bio = String(cRow.descricao).trim();
+          }
+          if (!String(j.endereco || '').trim() && String(cRow.endereco || '').trim()) {
+            j.endereco = String(cRow.endereco).trim();
+          }
+        }
+      }
+    }
+    return res.status(200).json({
+      user_id: j.user_id,
+      nome: j.nome,
+      sobrenome: j.sobrenome,
+      email: j.email,
+      role: j.role,
+      cpf: j.cpf,
+      telefone: j.telefone,
+      data_nascimento: j.data_nascimento,
+      genero: j.genero,
+      cidade: j.cidade,
+      uf: j.uf,
+      estilo_favorito: j.estilo_favorito,
+      endereco: j.endereco,
+      bio: j.bio,
+    });
+  } catch (e) {
+    return res.status(500).json({ message: 'Erro ao carregar usuário.' });
+  }
+}
 
 async function register(req, res) {
 
@@ -19,7 +87,8 @@ async function register(req, res) {
     return res.status(400).json({ error: `Dados de registro inválidos: ${errorMessages}` });
   }
 
-  const { nome, sobrenome, cpf, email, senha, telefone, role } = validationResult.data;
+  const { nome, sobrenome, cpf, email, senha, telefone, role, bairro_id } =
+    validationResult.data;
 
   let supabaseUserId = null;
 
@@ -57,6 +126,9 @@ async function register(req, res) {
     };
     if (telefone) {
       dataToCreate.telefone = telefone;
+    }
+    if (bairro_id != null) {
+      dataToCreate.bairro_id = bairro_id;
     }
 
     const createdUser = await userService.create(dataToCreate);
@@ -192,4 +264,4 @@ async function alterarSenha(req, res) {
 
 
 
-module.exports = { register, login, recoverPassword, alterarSenha };
+module.exports = { register, login, recoverPassword, alterarSenha, getMe };
