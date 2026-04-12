@@ -1,56 +1,97 @@
-const review = require("../models/review.js");
+const Review = require("../models/Review.js");
 const client = require("../models/Client.js");
+const User = require("../models/user.js");
 const { Op } = require("sequelize");
 
-const includeCliente = [
-  {
-    model: client,
-    as: "cliente",
-    attributes: ["client_id", "nome"],
-  },
-];
-
-
-async function getAll(reviewId) {
-    return await review.findAll(
-        {where: { review_id: reviewId,},
-        include: includeCliente}
-        
-    );
+function normalizeCpf(cpf) {
+  return String(cpf || "").replace(/\D/g, "");
 }
 
-async function getById(userId, reviewId){
-    return await review.findOne({
-        where: {user_id: userId, review_id: reviewId},
-        include: includeCliente
-    })
+const includeCliente = {
+  model: client,
+  as: "cliente",
+  attributes: ["client_id", "nome"],
+};
+
+const includeTatuador = {
+  model: User,
+  as: "tatuador",
+  attributes: ["user_id", "nome", "sobrenome"],
+};
+
+async function getAllByClienteCpf(cpf) {
+  const c = normalizeCpf(cpf);
+  if (c.length !== 11) return [];
+  const clientRows = await client.findAll({
+    where: { cpf: c },
+    attributes: ["client_id"],
+  });
+  const ids = clientRows.map((r) => r.client_id);
+  if (!ids.length) return [];
+  return Review.findAll({
+    where: { cliente_id: { [Op.in]: ids } },
+    include: [includeCliente, includeTatuador],
+    order: [["createdAt", "DESC"]],
+  });
 }
 
-async function postReview(newReview){
-    return await review.create(newReview);
+async function createFromValidatedSession(session, { nota, comentario }) {
+  const rawDate = session.getDataValue("data_atendimento");
+  const existing = await Review.findOne({
+    where: {
+      cliente_id: session.cliente_id,
+      usuario_id: session.usuario_id,
+      data_sessao: rawDate,
+    },
+  });
+  if (existing) {
+    throw new Error("Já existe avaliação para esta sessão.");
+  }
+  return Review.create({
+    cliente_id: session.cliente_id,
+    usuario_id: session.usuario_id,
+    data_sessao: rawDate,
+    nota,
+    comentario: comentario ?? "",
+  });
 }
 
-async function updateReview(reviewId, newReview){
-    const analise = await review.findByPk(reviewId, {include: includeCliente})
-    if (!analise) throw new Error('Análise não encontrada');
-
-    Object.assign(analise, newReview);
-    await analise.save();
-    return analise;
+async function findByPkForClienteCpf(reviewId, cpf) {
+  const c = normalizeCpf(cpf);
+  if (c.length !== 11) return null;
+  return Review.findByPk(reviewId, {
+    include: [
+      {
+        model: client,
+        as: "cliente",
+        where: { cpf: c },
+        required: true,
+        attributes: ["client_id", "cpf"],
+      },
+    ],
+  });
 }
 
-async function deleteReview(reviewId){
-    const analise = await review.findByPk(reviewId, {include: includeCliente})
-    if (!analise) throw new Error('Análise não encontrada');
+async function updateReview(reviewId, cpf, patch) {
+  const review = await findByPkForClienteCpf(reviewId, cpf);
+  if (!review) return null;
+  if (patch.nota !== undefined) review.nota = patch.nota;
+  if (patch.comentario !== undefined) review.comentario = patch.comentario;
+  await review.save();
+  return review;
+}
 
-    await analise.destroy();
-    return;
+async function deleteReview(reviewId, cpf) {
+  const review = await findByPkForClienteCpf(reviewId, cpf);
+  if (!review) return false;
+  await review.destroy();
+  return true;
 }
 
 module.exports = {
-    getAll,
-    getById,
-    postReview,
-    updateReview,
-    deleteReview
-}
+  getAllByClienteCpf,
+  createFromValidatedSession,
+  findByPkForClienteCpf,
+  updateReview,
+  deleteReview,
+};
