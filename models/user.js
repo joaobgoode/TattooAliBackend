@@ -58,7 +58,28 @@ const User = sequelize.define('User', {
     type: DataTypes.ENUM('cliente', 'tatuador', 'admin'),
     allowNull: false,
     defaultValue: 'tatuador'
-  }
+  },
+
+  data_nascimento: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+  },
+  genero: {
+    type: DataTypes.STRING(40),
+    allowNull: true,
+  },
+  cidade: {
+    type: DataTypes.STRING(120),
+    allowNull: true,
+  },
+  uf: {
+    type: DataTypes.STRING(2),
+    allowNull: true,
+  },
+  estilo_favorito: {
+    type: DataTypes.STRING(80),
+    allowNull: true,
+  },
 });
 
 User.beforeCreate(async (user, options) => {
