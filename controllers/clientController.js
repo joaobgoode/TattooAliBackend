@@ -1,12 +1,17 @@
 const clientService = require('../services/clientService');
+const { cpf: cpfValidator } = require('cpf-cnpj-validator');
 
-function validarNome(nome) {
-  return typeof nome === 'string' && nome.length >= 5 && nome.length <= 50;
+function apenasDigitos(v) {
+  return String(v ?? '').replace(/\D/g, '');
 }
 
-function validarTelefone(telefone) {
-  const regex = /^[0-9]+$/; // só números
-  return typeof telefone === 'string' && regex.test(telefone);
+function validarNome(nome) {
+  return typeof nome === 'string' && nome.trim().length >= 5 && nome.trim().length <= 50;
+}
+
+/** Aceita número com ou sem máscara; valida após remover tudo que não é dígito. */
+function validarTelefoneDigitos(digitos) {
+  return typeof digitos === 'string' && digitos.length >= 10 && digitos.length <= 13;
 }
 
 function validarDescricao(descricao) {
@@ -20,20 +25,43 @@ function validarEndereco(endereco) {
 
 //Criar cliente
 async function createClient(req, res) {
-  const { nome, telefone, descricao, endereco } = req.body;
+  const { nome, descricao, endereco } = req.body;
+  const telefoneDigitos = apenasDigitos(req.body.telefone);
+  const cpfDigitos = apenasDigitos(req.body.cpf);
 
-  if (!nome) {
+  if (!nome || !nome.trim()) {
     return res.status(400).json({ error: "Campos obrigatórios em branco" });
   }
 
-  if (!validarNome(nome) || !validarTelefone(telefone) || !validarDescricao(descricao) || !validarEndereco(endereco)) {
-    return res.status(400).json({ error: "Campos inválidos" });
+  if (!cpfDigitos || cpfDigitos.length !== 11 || !cpfValidator.isValid(cpfDigitos)) {
+    return res.status(400).json({ error: "CPF inválido. Informe os 11 dígitos (com ou sem máscara)." });
+  }
+
+  if (!validarNome(nome)) {
+    return res.status(400).json({ error: "Nome inválido: use entre 5 e 50 caracteres." });
+  }
+
+  if (!validarTelefoneDigitos(telefoneDigitos)) {
+    return res.status(400).json({
+      error: "Telefone inválido: informe DDD + número (ex.: 11999998888 ou com máscara).",
+    });
+  }
+
+  if (!validarDescricao(descricao) || !validarEndereco(endereco)) {
+    return res.status(400).json({ error: "Descrição ou endereço excede o tamanho permitido." });
   }
 
   const user_id = req.user.id;
 
   try {
-    const novoCliente = { nome, telefone, descricao, user_id, endereco };
+    const novoCliente = {
+      nome: nome.trim(),
+      telefone: telefoneDigitos,
+      cpf: cpfDigitos,
+      descricao,
+      user_id,
+      endereco: endereco || '',
+    };
     const novoRegistro = await clientService.create(novoCliente);
     return res.status(201).json(novoRegistro);
   } catch (error) {
@@ -50,7 +78,7 @@ async function getClients(req, res) {
       return res.status(200).json(clients);
     }
     if (telefone) {
-      const client = await clientService.getByPhone(telefone);
+      const client = await clientService.getByPhone(apenasDigitos(telefone));
       return res.status(200).json(client);
     }
     const user_id = req.user.id;
@@ -84,11 +112,30 @@ async function getClientById(req, res) {
 // Atualizar cliente
 async function updateClient(req, res) {
   const { id } = req.params;
-  const { nome, telefone, descricao, endereco } = req.body;
+  const { nome, telefone, descricao, endereco, cpf } = req.body;
   const user_id = req.user.id;
 
-  if ((nome && !validarNome(nome)) || (telefone && !validarTelefone(telefone)) || (descricao && !validarDescricao(descricao)) || (endereco && !validarEndereco(endereco))) {
-    return res.status(400).json({ error: "Campos inválidos" });
+  const telefoneDigitos = telefone != null && telefone !== '' ? apenasDigitos(telefone) : null;
+  const cpfDigitos = cpf != null && cpf !== '' ? apenasDigitos(cpf) : null;
+
+  if (nome && !validarNome(nome)) {
+    return res.status(400).json({ error: "Nome inválido: use entre 5 e 50 caracteres." });
+  }
+  if (cpfDigitos !== null) {
+    if (cpfDigitos.length !== 11 || !cpfValidator.isValid(cpfDigitos)) {
+      return res.status(400).json({ error: "CPF inválido." });
+    }
+  }
+  if (telefoneDigitos !== null && !validarTelefoneDigitos(telefoneDigitos)) {
+    return res.status(400).json({
+      error: "Telefone inválido: informe DDD + número (ex.: 11999998888 ou com máscara).",
+    });
+  }
+  if (descricao && !validarDescricao(descricao)) {
+    return res.status(400).json({ error: "Descrição excede o tamanho permitido." });
+  }
+  if (endereco && !validarEndereco(endereco)) {
+    return res.status(400).json({ error: "Endereço excede o tamanho permitido." });
   }
 
   try {
@@ -96,7 +143,13 @@ async function updateClient(req, res) {
     if (!isOwner) {
       return res.status(404).json({ error: "Cliente não encontrado ou não pertence ao usuario" });
     }
-    const updated = await clientService.update(id, { nome, telefone, descricao, endereco });
+    const payload = {};
+    if (nome !== undefined) payload.nome = nome.trim();
+    if (telefoneDigitos !== null) payload.telefone = telefoneDigitos;
+    if (cpfDigitos !== null) payload.cpf = cpfDigitos;
+    if (descricao !== undefined) payload.descricao = descricao;
+    if (endereco !== undefined) payload.endereco = endereco;
+    const updated = await clientService.update(id, payload);
     if (!updated) {
       return res.status(404).json({ error: "Cliente não encontrado" });
     }
