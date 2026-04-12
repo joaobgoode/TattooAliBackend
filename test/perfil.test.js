@@ -27,4 +27,30 @@ describe("Checagem do role do usuario", function () {
         expect(['cliente', 'tatuador', 'admin']).toContain(perfilRes.body.role)
         console.log(loginRes.body)
     })
+
+    it('deve retornar role "tatuador" para um usuário tatuador', async () => {
+        const loginRes = await request(app)
+            .post('/api/user/login')
+            .send({ email: TEST_EMAIL, senha: TEST_PASSWORD });
+        
+        const perfilRes = await request(app)
+            .get('/api/perfil/')
+            .set('Authorization', `Bearer ${loginRes.body.token}`);
+        
+        expect(perfilRes.statusCode).toBe(200);
+        expect(perfilRes.body.role).toBe('tatuador');
+    });
+
+    it('deve retornar role "cliente" para um usuário cliente', async () => {
+        const loginRes = await request(app)
+            .post('/api/user/login')
+            .send({ email: TEST_EMAIL, senha: TEST_PASSWORD });
+        
+        const perfilRes = await request(app)
+            .get('/api/perfil/')
+            .set('Authorization', `Bearer ${loginRes.body.token}`);
+        
+        expect(perfilRes.statusCode).toBe(200);
+        expect(perfilRes.body.role).toBe('cliente');
+    });
 })
