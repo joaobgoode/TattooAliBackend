@@ -18,6 +18,7 @@ const photoRoutes = require('./routes/photoRoutes.js')
 const generatedImages = require('./routes/aiGalleryRoutes.js')
 const bairroRoutes = require('./routes/bairroRoutes.js')
 const tatuadorRoutes = require('./routes/tatuadorRoutes.js')
+const reviewRoutes = require('./routes/reviewRoutes.js')
 
 const allowedOrigins =
   process.env.NODE_ENV === "production"
@@ -27,6 +28,10 @@ const allowedOrigins =
       "http://127.0.0.1:5173",
       "http://localhost:8081",
       "http://127.0.0.1:8081",
+      "http://localhost:8082",
+      "http://127.0.0.1:8082",
+      "http://localhost:19006",
+      "http://127.0.0.1:19006",
       "http://10.0.2.2:8081", // Android emulador
       "exp://127.0.0.1:8081", // Expo
       "exp://localhost:8081"
@@ -78,6 +83,7 @@ app.use('/api/mobile/sessions', sessionClienteRoutes)
 
 app.use('/api/bairro', bairroRoutes)
 app.use('/api/tatuador', tatuadorRoutes)
+app.use('/api/reviews', reviewRoutes)
 
 app.use('/docs', swaggerUI.serve, swaggerUI.setup(setupSwagger))
 module.exports = app;
