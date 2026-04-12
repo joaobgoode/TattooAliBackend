@@ -179,6 +179,9 @@ console.log(clientController)
  */
 router.get('/', auth.requireTatuador, clientController.getClients);
 
+router.get('/lookup-app-user', auth.requireTatuador, clientController.lookupAppClienteByCpf);
+router.post('/link-from-app-user', auth.requireTatuador, clientController.linkClientFromAppUser);
+
 /**
  * @swagger
  * /clients/{id}:

@@ -188,11 +188,42 @@ async function registerNewClient(req, res) {
   }
 }
 
+/** GET ?cpf= — tatuador consulta se existe conta app (cliente) com o CPF. */
+async function lookupAppClienteByCpf(req, res) {
+  const cpfDigitos = apenasDigitos(req.query.cpf);
+  if (!cpfDigitos || cpfDigitos.length !== 11 || !cpfValidator.isValid(cpfDigitos)) {
+    return res.status(400).json({ error: 'CPF inválido. Informe 11 dígitos.' });
+  }
+  try {
+    const r = await clientService.lookupClienteAppUserByCpf(cpfDigitos, req.user.id);
+    return res.status(200).json(r);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+}
+
+/** POST { cpf } — vincula à agenda do tatuador usando dados do User. */
+async function linkClientFromAppUser(req, res) {
+  const cpfDigitos = apenasDigitos(req.body?.cpf);
+  if (!cpfDigitos || cpfDigitos.length !== 11 || !cpfValidator.isValid(cpfDigitos)) {
+    return res.status(400).json({ error: 'CPF inválido. Informe 11 dígitos.' });
+  }
+  const user_id = req.user.id;
+  try {
+    const row = await clientService.linkClientFromAppUserByCpf(user_id, cpfDigitos);
+    return res.status(201).json(row);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+}
+
 module.exports = {
   createClient,
   getClients,
   getClientById,
   updateClient,
   deleteClient,
-  registerNewClient
+  registerNewClient,
+  lookupAppClienteByCpf,
+  linkClientFromAppUser,
 };
