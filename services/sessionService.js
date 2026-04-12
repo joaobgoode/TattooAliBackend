@@ -1,13 +1,18 @@
 const sessao = require('../models/Session.js');
 const client = require('../models/Client.js');
+const User = require('../models/user.js');
 const { Op } = require('sequelize');
+
+function normalizeCpf(cpf) {
+  return String(cpf || '').replace(/\D/g, '');
+}
 
 const includeCliente = [
   {
     model: client,
     as: 'cliente',
-    attributes: ['client_id', 'nome', 'telefone', 'descricao', 'endereco']
-  }
+    attributes: ['client_id', 'nome', 'telefone', 'descricao', 'endereco', 'cpf'],
+  },
 ];
 
 async function verifySession(userId, sessionId) {
@@ -195,100 +200,135 @@ async function getClientCanceledSessionsByDate(userId, clientId, date) {
   });
 }
 
-async function getClientSessionsByCPF(cpf) {
-    return await Session.findAll({
-      include: [
-        {
-          model: Client,
-          where: { cpf: cpf },
-          attributes: ["client_id", "cpf", "name"]
-        },
-        {
-          model: User,
-          as: "tatuador",
-          attributes: ["user_id", "name", "email"]
-        }
-      ]
-    });
-}
-
-async function getClientSessionsToday(cpf) {
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  return await Session.findAll({
-    where: {
-      date: {
-        [Op.gte]: today,
-        [Op.lt]: tomorrow
-      }
-    },
+/** Sessões em que o registro Cliente tem o mesmo CPF do usuário logado (app cliente). */
+async function getClienteSessionsPendingByCpf(cpf) {
+  const c = normalizeCpf(cpf);
+  if (!c) return [];
+  return sessao.findAll({
+    where: { realizado: false, cancelado: false },
     include: [
       {
-        model: Client,
-        where: { cpf },
-        attributes: ["client_id", "cpf", "name"]
+        model: client,
+        as: 'cliente',
+        where: { cpf: c },
+        required: true,
+        attributes: ['client_id', 'nome', 'telefone', 'descricao', 'endereco', 'cpf'],
       },
       {
         model: User,
-        as: "tatuador",
-        attributes: ["user_id", "name", "email"]
-      }
-    ]
+        attributes: ['user_id', 'nome', 'sobrenome', 'email', 'telefone'],
+      },
+    ],
+    order: [['data_atendimento', 'ASC']],
+  });
+}
+
+async function getClienteSessionsRealizedByCpf(cpf) {
+  const c = normalizeCpf(cpf);
+  if (!c) return [];
+  return sessao.findAll({
+    where: { realizado: true, cancelado: false },
+    include: [
+      {
+        model: client,
+        as: 'cliente',
+        where: { cpf: c },
+        required: true,
+        attributes: ['client_id', 'nome', 'telefone', 'descricao', 'endereco', 'cpf'],
+      },
+      {
+        model: User,
+        attributes: ['user_id', 'nome', 'sobrenome', 'email', 'telefone'],
+      },
+    ],
+    order: [['data_atendimento', 'DESC']],
+  });
+}
+
+/**
+ * Uma sessão específica acessível ao app cliente: mesmo CPF do cliente na ficha (Clients).
+ */
+async function getSessaoByIdForClienteCpf(sessao_id, cpf) {
+  const c = normalizeCpf(cpf);
+  if (!c) return null;
+  const id = Number.parseInt(String(sessao_id), 10);
+  if (!Number.isFinite(id) || id < 1) return null;
+  return sessao.findOne({
+    where: { sessao_id: id },
+    include: [
+      {
+        model: client,
+        as: 'cliente',
+        where: { cpf: c },
+        required: true,
+        attributes: ['client_id', 'nome', 'telefone', 'descricao', 'endereco', 'cpf'],
+      },
+      {
+        model: User,
+        attributes: ['user_id', 'nome', 'sobrenome', 'email', 'telefone'],
+      },
+    ],
+  });
+}
+
+async function getClienteSessionsCanceledByCpf(cpf) {
+  const c = normalizeCpf(cpf);
+  if (!c) return [];
+  return sessao.findAll({
+    where: { cancelado: true },
+    include: [
+      {
+        model: client,
+        as: 'cliente',
+        where: { cpf: c },
+        required: true,
+        attributes: ['client_id', 'nome', 'telefone', 'descricao', 'endereco', 'cpf'],
+      },
+      {
+        model: User,
+        attributes: ['user_id', 'nome', 'sobrenome', 'email', 'telefone'],
+      },
+    ],
+    order: [['data_atendimento', 'DESC']],
+  });
+}
+
+async function getClientSessionsByCPF(cpf) {
+  return getClienteSessionsPendingByCpf(cpf);
+}
+
+async function getClientSessionsToday(cpf) {
+  const c = normalizeCpf(cpf);
+  if (!c) return [];
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return sessao.findAll({
+    where: {
+      cancelado: false,
+      data_atendimento: { [Op.gte]: start, [Op.lt]: end },
+    },
+    include: [
+      {
+        model: client,
+        as: 'cliente',
+        where: { cpf: c },
+        required: true,
+        attributes: ['client_id', 'nome', 'telefone', 'descricao', 'endereco', 'cpf'],
+      },
+      { model: User, attributes: ['user_id', 'nome', 'sobrenome', 'email', 'telefone'] },
+    ],
+    order: [['data_atendimento', 'ASC']],
   });
 }
 
 async function getClientSessionsPast(cpf) {
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-  return await Session.findAll({
-    where: {
-      date: {
-        [Op.lt]: today
-      }
-    },
-    include: [
-      {
-        model: Client,
-        where: { cpf },
-        attributes: ["client_id", "cpf", "name"]
-      },
-      {
-        model: User,
-        as: "tatuador",
-        attributes: ["user_id", "name", "email"]
-      }
-    ]
-  });
+  return getClienteSessionsRealizedByCpf(cpf);
 }
 
 async function getClientSessionsFuture(cpf) {
-  const today = new Date();
-  today.setHours(23,59,59,999);
-
-  return await Session.findAll({
-    where: {
-      date: {
-        [Op.gt]: today
-      }
-    },
-    include: [
-      {
-        model: Client,
-        where: { cpf },
-        attributes: ["client_id", "cpf", "name"]
-      },
-      {
-        model: User,
-        as: "tatuador",
-        attributes: ["user_id", "name", "email"]
-      }
-    ]
-  });
+  return getClienteSessionsPendingByCpf(cpf);
 }
 
 module.exports = {
@@ -316,5 +356,9 @@ module.exports = {
   getClientSessionsByCPF,
   getClientSessionsFuture,
   getClientSessionsPast,
-  getClientSessionsToday
+  getClientSessionsToday,
+  getClienteSessionsPendingByCpf,
+  getClienteSessionsRealizedByCpf,
+  getClienteSessionsCanceledByCpf,
+  getSessaoByIdForClienteCpf,
 };
