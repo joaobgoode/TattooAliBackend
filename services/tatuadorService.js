@@ -2,8 +2,9 @@ const User = require('../models/user.js');
 const Style = require('../models/style.js');
 const Photo = require('../models/Photo.js');
 const Review = require('../models/Review.js');
-import { fn, col, literal } from 'sequelize'
+const { fn, col, literal } = require('sequelize');
 
+require('../models/user_style.js');
 
 async function exist(user_id) {
   const user = await User.findOne({
@@ -14,32 +15,33 @@ async function exist(user_id) {
 
 async function getUserStyles(user_id) {
   const styles = await Style.findAll({
-    attributes: ['id', 'name'],
+    attributes: ['id', 'nome'],
     include: [{
-      model: UserStyle,
+      model: User,
       attributes: [],
-      where: { user_id: userId }
+      where: { user_id },
+      through: { attributes: [] }
     }]
-  })
+  });
   return styles;
 }
 
 async function getUserPhotos(user_id) {
   const photos = await Photo.findAll({
     attributes: ['photo_id', 'url', 'titulo', 'descricao'],
-    where: { user_id: user_id },
-    order: [['created_at', 'DESC']]
-  })
-  return photos
+    where: { user_Id: user_id },
+    order: [['createdAt', 'DESC']]
+  });
+  return photos;
 }
 
 async function getUserReviews(user_id) {
   const reviews = await Review.findAll({
-    attributes: ['id', 'user_id', 'tattoo_id', 'rating', 'comment'],
-    where: { tatuador: user_id },
-    order: [['created_at', 'DESC']]
-  })
-  return reviews
+    attributes: ['review_id', 'usuario_id', 'data_sessao', 'nota', 'comentario'],
+    where: { usuario_id: user_id },
+    order: [['createdAt', 'DESC']]
+  });
+  return reviews;
 }
 
 async function getUsersByBairro(bairro_id) {
@@ -48,32 +50,34 @@ async function getUsersByBairro(bairro_id) {
       bairro_id: bairro_id
     },
     attributes: [
-      'id',
-      'name',
-      [fn('AVG', col('Reviews.rating')), 'media'],
-      [fn('COUNT', col('Reviews.id')), 'qtd']
+      'user_id',
+      'nome',
+      'sobrenome',
+      'bairro_id',
+      [fn('AVG', col('Reviews.nota')), 'media'],
+      [fn('COUNT', col('Reviews.review_id')), 'qtd']
     ],
     include: [
       {
         model: Review,
+        as: 'Reviews',
         attributes: []
       }
     ],
-    group: ['User.id', 'User.name', 'User.bairro'],
+    group: ['User.user_id', 'User.nome', 'User.sobrenome', 'User.bairro_id'],
     order: [
       [literal('"media"'), 'DESC'],
       [literal('"qtd"'), 'DESC']
     ]
-  })
-  return users
+  });
+  return users;
 }
 
 async function getUserPerfil(user_id) {
   const user = await User.findOne({
-    user_id: user_id,
-    role: 'tatuador'
-  })
-  return user
+    where: { user_id, role: 'tatuador' }
+  });
+  return user;
 }
 
 

@@ -20,9 +20,9 @@ async function getUserReviews(req, res) {
 
     const user_id = req.params.user_id;
 
-    const user = tatuadorService.exist(user_id);
+    const userExists = await tatuadorService.exist(user_id);
 
-    if (!user) {
+    if (!userExists) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
@@ -41,9 +41,9 @@ async function getUserReviews(req, res) {
 async function getUserPhotos(req, res) {
   try {
     const user_id = req.params.user_id;
-    const user = tatuadorService.exist(user_id);
+    const userExists = await tatuadorService.exist(user_id);
 
-    if (!user) {
+    if (!userExists) {
       return res.status(404).json({ message: 'User not found.' });
     }
     const photos = await tatuadorService.getUserPhotos(user_id);
@@ -56,8 +56,8 @@ async function getUserPhotos(req, res) {
 async function getUserStyles(req, res) {
   try {
     const user_id = req.params.user_id;
-    const user = tatuadorService.exist(user_id);
-    if (!user) {
+    const userExists = await tatuadorService.exist(user_id);
+    if (!userExists) {
       return res.status(404).json({ message: 'User not found.' });
     }
     const styles = await tatuadorService.getUserStyles(user_id);
