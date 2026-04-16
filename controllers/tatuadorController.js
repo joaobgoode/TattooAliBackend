@@ -1,5 +1,11 @@
 const tatuadorService = require('../services/tatuadorService');
 
+function parseUserIdParam(raw) {
+  const n = Number.parseInt(String(raw ?? ''), 10);
+  if (!Number.isFinite(n) || n < 1) return null;
+  return n;
+}
+
 async function getByBairro(req, res) {
   try {
 
@@ -17,8 +23,10 @@ async function getByBairro(req, res) {
 
 async function getUserReviews(req, res) {
   try {
-
-    const user_id = req.params.user_id;
+    const user_id = parseUserIdParam(req.params.user_id);
+    if (user_id == null) {
+      return res.status(400).json({ message: 'ID de tatuador inválido.' });
+    }
 
     const userExists = await tatuadorService.exist(user_id);
 
@@ -40,7 +48,10 @@ async function getUserReviews(req, res) {
 
 async function getUserPhotos(req, res) {
   try {
-    const user_id = req.params.user_id;
+    const user_id = parseUserIdParam(req.params.user_id);
+    if (user_id == null) {
+      return res.status(400).json({ message: 'ID de tatuador inválido.' });
+    }
     const userExists = await tatuadorService.exist(user_id);
 
     if (!userExists) {
@@ -55,7 +66,10 @@ async function getUserPhotos(req, res) {
 
 async function getUserStyles(req, res) {
   try {
-    const user_id = req.params.user_id;
+    const user_id = parseUserIdParam(req.params.user_id);
+    if (user_id == null) {
+      return res.status(400).json({ message: 'ID de tatuador inválido.' });
+    }
     const userExists = await tatuadorService.exist(user_id);
     if (!userExists) {
       return res.status(404).json({ message: 'User not found.' });
@@ -69,15 +83,43 @@ async function getUserStyles(req, res) {
 
 async function getUserPerfil(req, res) {
   try {
-    const user_id = req.params.user_id;
+    const user_id = parseUserIdParam(req.params.user_id);
+    if (user_id == null) {
+      return res.status(400).json({ message: 'ID de tatuador inválido.' });
+    }
     const user = await tatuadorService.getUserPerfil(user_id);
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
-    res.status(200).json(user);
+    const payload = user.toJSON();
+    delete payload.senha;
+    res.status(200).json(payload);
   } catch (error) {
-    res.status(500).json({ message: 'Error getting user perfil.' });
+    console.error('getUserPerfil:', error);
+    res.status(500).json({
+      message: 'Erro ao carregar perfil do tatuador.',
+      error: 'Error getting user perfil.',
+    });
   }
 }
 
-module.exports = { getByBairro, getUserReviews, getUserPhotos, getUserStyles, getUserPerfil };
+async function searchTatuadores(req, res) {
+  try {
+    const q = req.query.q ?? '';
+    const estilo = req.query.estilo ?? 'Todos';
+    const results = await tatuadorService.searchTatuadores({ q, estilo });
+    res.status(200).json(results);
+  } catch (error) {
+    console.error('searchTatuadores:', error);
+    res.status(500).json({ error: 'Erro ao buscar tatuadores.' });
+  }
+}
+
+module.exports = {
+  getByBairro,
+  getUserReviews,
+  getUserPhotos,
+  getUserStyles,
+  getUserPerfil,
+  searchTatuadores,
+};

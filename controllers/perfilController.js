@@ -50,13 +50,22 @@ async function updatePerfil(req, res) {
       return res.status(400).json({ message: `Dados de entrada inválidos: ${errorMessages}` });
     }
 
-    const { especialidades, ...dataPerfil } = validationResult.data;
+    const parsed = validationResult.data;
+    const hasEspecialidades = Object.prototype.hasOwnProperty.call(
+      parsed,
+      'especialidades',
+    );
+    const { especialidades, ...dataPerfil } = parsed;
 
     if (req.file) {
       dataPerfil.foto = req.file.filename;
     }
 
-    const perfil = await perfilService.updatePerfil(id, dataPerfil, especialidades || []);
+    const perfil = await perfilService.updatePerfil(
+      id,
+      dataPerfil,
+      hasEspecialidades ? especialidades ?? [] : undefined,
+    );
     return res.status(200).json(perfil);
   } catch (error) {
     return res.status(400).json({ message: error.message });

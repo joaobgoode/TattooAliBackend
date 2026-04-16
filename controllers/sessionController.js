@@ -1,6 +1,19 @@
 const sessionService = require('../services/sessionService');
 const { belongsToUser } = require('../services/clientService.js');
 const { createSessionSchema, updateSessionSchema, changeStatusSchema } = require('../schemas/sessionSchema');
+const User = require('../models/user.js');
+
+async function cpfFromAuthenticatedUser(req) {
+  const fromMiddleware = req.userData?.cpf;
+  const midDigits = String(fromMiddleware || '').replace(/\D/g, '');
+  if (midDigits.length === 11) {
+    return fromMiddleware;
+  }
+  const id = req.user?.id;
+  if (!id) return null;
+  const row = await User.findByPk(id, { attributes: ['cpf'] });
+  return row?.cpf ?? null;
+}
 
 const sessionController = {
 
@@ -362,8 +375,11 @@ const sessionController = {
   
   async getClientSessionsByCPF(req, res) {
     try {
-      const cpf = req.user.cpf;
-      const sessions = await sessionService.getClientSessionsByCPF(usuario_id, clienteId, data);
+      const cpf = req.userData?.cpf;
+      if (!cpf) {
+        return res.status(400).json({ message: 'CPF não encontrado no cadastro.' });
+      }
+      const sessions = await sessionService.getClientSessionsByCPF(cpf);
       res.status(200).json(sessions);
     } catch (error) {
       res.status(500).json({ message: 'Erro interno do servidor' });
@@ -371,8 +387,11 @@ const sessionController = {
   },
   async getClientSessionsFuture(req, res) {
     try {
-      const cpf = req.user.cpf;
-      const sessions = await sessionService.getClientSessionsByCPF(cpf);
+      const cpf = req.userData?.cpf;
+      if (!cpf) {
+        return res.status(400).json({ message: 'CPF não encontrado no cadastro.' });
+      }
+      const sessions = await sessionService.getClientSessionsFuture(cpf);
       res.status(200).json(sessions);
     } catch (error) {
       res.status(500).json({ message: 'Erro interno do servidor' });
@@ -380,8 +399,11 @@ const sessionController = {
   },
   async getClientSessionsPast(req, res) {
     try {
-      const cpf = req.user.cpf;
-      const sessions = await sessionService.getClientSessionsByCPF(cpf);
+      const cpf = req.userData?.cpf;
+      if (!cpf) {
+        return res.status(400).json({ message: 'CPF não encontrado no cadastro.' });
+      }
+      const sessions = await sessionService.getClientSessionsPast(cpf);
       res.status(200).json(sessions);
     } catch (error) {
       res.status(500).json({ message: 'Erro interno do servidor' });
@@ -389,13 +411,55 @@ const sessionController = {
   },
   async getClientSessionsToday(req, res) {
     try {
-      const cpf = req.user.cpf;
-      const sessions = await sessionService.getClientSessionsByCPF(cpf);
+      const cpf = req.userData?.cpf;
+      if (!cpf) {
+        return res.status(400).json({ message: 'CPF não encontrado no cadastro.' });
+      }
+      const sessions = await sessionService.getClientSessionsToday(cpf);
       res.status(200).json(sessions);
     } catch (error) {
       res.status(500).json({ message: 'Erro interno do servidor' });
     }
-  }
+  },
+
+  async getMySessionsPending(req, res) {
+    try {
+      const cpf = await cpfFromAuthenticatedUser(req);
+      if (!String(cpf || '').replace(/\D/g, '')) {
+        return res.status(400).json({ message: 'CPF não encontrado no cadastro.' });
+      }
+      const sessions = await sessionService.getClienteSessionsPendingByCpf(cpf);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro ao carregar sessões agendadas.' });
+    }
+  },
+
+  async getMySessionsRealized(req, res) {
+    try {
+      const cpf = await cpfFromAuthenticatedUser(req);
+      if (!String(cpf || '').replace(/\D/g, '')) {
+        return res.status(400).json({ message: 'CPF não encontrado no cadastro.' });
+      }
+      const sessions = await sessionService.getClienteSessionsRealizedByCpf(cpf);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro ao carregar sessões concluídas.' });
+    }
+  },
+
+  async getMySessionsCanceled(req, res) {
+    try {
+      const cpf = await cpfFromAuthenticatedUser(req);
+      if (!String(cpf || '').replace(/\D/g, '')) {
+        return res.status(400).json({ message: 'CPF não encontrado no cadastro.' });
+      }
+      const sessions = await sessionService.getClienteSessionsCanceledByCpf(cpf);
+      res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: 'Erro ao carregar sessões canceladas.' });
+    }
+  },
 
 }
 

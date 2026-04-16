@@ -1,9 +1,9 @@
 const express = require('express');
-const auth = require('../authentication/auth.js');
 const bairroController = require('../controllers/bairrocontroller.js');
 
 const router = express.Router();
 
-router.get('/', auth.authenticateToken, bairroController.getAll);
+/** Lista de referência (id + nome); usada no cadastro antes do login. */
+router.get('/', bairroController.getAll);
 
 module.exports = router;

@@ -132,6 +132,7 @@ describe('User Schemas Validation', () => {
       email: mockValidUser.email,
       senha: mockValidUser.senha,
       telefone: mockValidUser.telefone,
+      role: 'tatuador',
     };
 
     it('deve validar um objeto de registro válido com telefone', () => {

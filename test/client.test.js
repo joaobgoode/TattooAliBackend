@@ -6,6 +6,9 @@ TEST_PASSWORD = process.env.TEST_PASSWORD
 
 let clientId;
 
+/** CPF válido só para testes automatizados (não usar em produção). */
+const CPF_VALIDO = '52998224725';
+
 describe("Rotas de cliente", function() {
     let accessToken
     it('faz login e obtém o token de acesso', async () => {
@@ -22,6 +25,7 @@ describe("Rotas de cliente", function() {
         const newClient = {
             nome: "Cliente Teste JS",
             telefone: "11999998888",
+            cpf: CPF_VALIDO,
             descricao: "Descrição do cliente de teste",
             endereco: "Rua do Teste, 123"
         };
@@ -48,18 +52,20 @@ describe("Rotas de cliente", function() {
         const response = await request(app)
             .post('/api/client/')
             .set('Authorization', `Bearer ${accessToken}`)
-            .send({ nome: "Cur", telefone: "11999998888" });
+            .send({ nome: "Cur", telefone: "11999998888", cpf: CPF_VALIDO });
         expect(response.statusCode).toBe(400);
-        expect(response.body.error).toBe("Campos inválidos");
+        expect(response.body.error).toBe("Nome inválido: use entre 5 e 50 caracteres.");
     })
 
-    it('deve retornar 400 se o telefone contiver caracteres não numéricos', async () => {
+    it('deve retornar 400 se o telefone for inválido (curto)', async () => {
         const response = await request(app)
             .post('/api/client/')
             .set('Authorization', `Bearer ${accessToken}`)
-            .send({ nome: "Nome Válido", telefone: "11-999998888" });
+            .send({ nome: "Nome Válido", telefone: "12", cpf: CPF_VALIDO });
         expect(response.statusCode).toBe(400);
-        expect(response.body.error).toBe("Campos inválidos");
+        expect(response.body.error).toBe(
+            "Telefone inválido: informe DDD + número (ex.: 11999998888 ou com máscara).",
+        );
     })
 
 
@@ -133,7 +139,7 @@ describe("Rotas de cliente", function() {
             .set('Authorization', `Bearer ${accessToken}`)
             .send({ nome: "Cur" }); 
         expect(response.statusCode).toBe(400);
-        expect(response.body.error).toBe("Campos inválidos");
+        expect(response.body.error).toBe("Nome inválido: use entre 5 e 50 caracteres.");
     })
     
     it('deve retornar 404 ao tentar atualizar um cliente inexistente', async () => {
