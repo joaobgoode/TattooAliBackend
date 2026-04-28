@@ -20,6 +20,7 @@ const bairroRoutes = require('./routes/bairroRoutes.js')
 const tatuadorRoutes = require('./routes/tatuadorRoutes.js')
 const reviewRoutes = require('./routes/reviewRoutes.js')
 const favoritoRoutes = require('./routes/favoritoRoutes.js')
+const likePhotoRoutes = require("./routes/likePhotoRoutes.js");
 
 const allowedOrigins =
   process.env.NODE_ENV === "production"
@@ -76,6 +77,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/generate', generateRoutes);
 // Galeria
 app.use('/api/galeria', photoRoutes);
+app.use("/api/galeria", likePhotoRoutes);
 // Galeria de Ia
 app.use('/api/galeria-ia', generatedImages);
 
