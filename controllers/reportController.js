@@ -1,12 +1,17 @@
 const reportService = require("../services/reportService");
+const User = require("../models/user.js");
 
 async function createReport(req, res) {
   try {
     const { descricao, denunciadoId, tipoDenunciado, denunciadoNome } =
       req.body;
-
-    const denuncianteNome = req.user.nome;
-    const denuncianteId = req.user.user_id;
+    const denuncianteId = req.user?.id;
+    const denunciante = denuncianteId
+      ? await User.findByPk(denuncianteId, { attributes: ["nome", "sobrenome"] })
+      : null;
+    const denuncianteNome = denunciante
+      ? `${denunciante.nome || ""} ${denunciante.sobrenome || ""}`.trim() || "Usuário"
+      : "Usuário";
 
     if (!descricao || descricao.trim().length === 0) {
       return res.status(400).json({
@@ -21,7 +26,7 @@ async function createReport(req, res) {
         message: "Dados do denunciado são obrigatórios",
       });
     }
-    const denuncia = await denunciaService.criarDenuncia({
+    const denuncia = await reportService.createReport({
       descricao,
       denuncianteId,
       denuncianteNome,
@@ -45,7 +50,7 @@ async function createReport(req, res) {
 
 async function getAllReports(req, res) {
   try {
-    const denuncias = await denunciaService.getAllReports();
+    const denuncias = await reportService.getAllReports();
 
     return res.status(200).json({
       success: true,
@@ -63,7 +68,7 @@ async function getAllReports(req, res) {
 async function getReportById(req, res) {
   try {
     const { id } = req.params;
-    const denuncia = await denunciaService.buscarDenunciaPorId(id);
+    const denuncia = await reportService.getReportById(id);
 
     return res.status(200).json({
       success: true,
@@ -81,8 +86,13 @@ async function updateReportStatus(req, res) {
   try {
     const { id } = req.params;
     const { status, respostaModerador } = req.body;
-
-    const moderadorNome = req.user.nome;
+    const moderadorId = req.user?.id;
+    const moderador = moderadorId
+      ? await User.findByPk(moderadorId, { attributes: ["nome", "sobrenome"] })
+      : null;
+    const moderadorNome = moderador
+      ? `${moderador.nome || ""} ${moderador.sobrenome || ""}`.trim() || "Moderador"
+      : "Moderador";
 
     if (!status) {
       return res.status(400).json({
@@ -91,7 +101,7 @@ async function updateReportStatus(req, res) {
       });
     }
 
-    const denuncia = await denunciaService.atualizarStatusDenuncia(
+    const denuncia = await reportService.updateReport(
       id,
       status,
       moderadorNome,
@@ -114,7 +124,7 @@ async function updateReportStatus(req, res) {
 async function deleteReport(req, res) {
   try {
     const { id } = req.params;
-    await denunciaService.deletarDenuncia(id);
+    await reportService.deleteReport(id);
 
     return res.status(200).json({
       success: true,

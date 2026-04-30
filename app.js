@@ -22,6 +22,7 @@ const reviewRoutes = require('./routes/reviewRoutes.js')
 const favoritoRoutes = require('./routes/favoritoRoutes.js')
 const likePhotoRoutes = require('./routes/likePhotoRoutes.js');
 const notificationRoutes = require('./routes/notificationRoutes.js')
+const reportRoutes = require('./routes/reportRoutes.js')
 
 const allowedOrigins =
   process.env.NODE_ENV === "production"
@@ -88,6 +89,7 @@ app.use('/api/mobile/sessions', sessionClienteRoutes)
 app.use('/api/bairro', bairroRoutes)
 app.use('/api/tatuador', tatuadorRoutes)
 app.use('/api/reviews', reviewRoutes)
+app.use('/api/reports', reportRoutes)
 app.use('/api/favoritos', favoritoRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/mobile/notifications', notificationRoutes)
