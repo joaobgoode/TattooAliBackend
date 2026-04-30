@@ -6,6 +6,6 @@ const auth = require('../authentication/auth.js');
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/perfil/', auth.requireTatuador, upload.single('image'), imageController.uploadImage);
+router.post('/perfil/', auth.authenticateToken, upload.single('image'), imageController.uploadImage);
 
 module.exports = router;
