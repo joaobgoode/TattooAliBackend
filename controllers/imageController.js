@@ -15,13 +15,15 @@ const uploadImage = async (req, res) => {
     const user = await userService.getById(userId);
     const userImage = user.dataValues.foto;
     await s3.uploadFile(req.file, path);
-    await userService.updateImage(userId, path);
+    const updatedUser = await userService.updateImage(userId, path);
     console.log(userImage);
     if (userImage) {
       const oldPath = String(userImage).replace(`${BUCKET_PUB_URL}/`, '');
       await s3.deleteFile(oldPath);
     }
-    return res.status(200).json({ image: `${BUCKET_PUB_URL}/${path}` });
+    return res.status(200).json({
+      image: updatedUser?.foto || `${BUCKET_PUB_URL}/${path}`,
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).send('Erro ao enviar imagem.');

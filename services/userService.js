@@ -13,7 +13,8 @@ async function getById(id) {
 async function updateImage(id, path) {
   const user = await User.findByPk(id);
   if (!user) return null;
-  return await User.update({ foto: path }, { where: { user_id: id } });
+  await user.update({ foto: path });
+  return user;
 }
 
 async function getByEmail(userEmail) {
