@@ -2,6 +2,7 @@ const sessionService = require('../services/sessionService');
 const { belongsToUser } = require('../services/clientService.js');
 const { createSessionSchema, updateSessionSchema, changeStatusSchema } = require('../schemas/sessionSchema');
 const User = require('../models/user.js');
+const notificationService = require('../services/notificationService.js');
 
 async function cpfFromAuthenticatedUser(req) {
   const fromMiddleware = req.userData?.cpf;
@@ -42,6 +43,11 @@ const sessionController = {
       };
 
       const session = await sessionService.createSession(newSession);
+      try {
+        await notificationService.notifySessionCreated(session.sessao_id);
+      } catch (e) {
+        console.error('Falha ao notificar sessao criada:', e?.message || e);
+      }
       res.status(201).json(session);
     } catch (error) {
       res.status(500).json({ message: 'Erro interno do servidor' });
@@ -128,12 +134,19 @@ const sessionController = {
     const updateData = validationResult.data;
 
     try {
-      const sessionExists = await sessionService.verifySession(usuario_id, id);
-      if (!sessionExists) {
+      const sessionBefore = await sessionService.getById(usuario_id, id);
+      if (!sessionBefore) {
         return res.status(404).json({ message: 'Sessão não encontrada.' });
       }
 
       const updateSession = await sessionService.updateSession(id, updateData);
+      if (updateData.cancelado === true && !sessionBefore.cancelado) {
+        try {
+          await notificationService.notifySessionCanceled(id, usuario_id);
+        } catch (e) {
+          console.error('Falha ao notificar sessao cancelada:', e?.message || e);
+        }
+      }
       res.json(updateSession);
     } catch (error) {
       res.status(500).json({ message: 'Erro ao atualizar sessão.' });
@@ -156,12 +169,19 @@ const sessionController = {
     const { realizado } = validationResult.data; // Apenas 'realizado' é esperado aqui
 
     try {
-      const sessionExists = await sessionService.verifySession(usuario_id, id);
-      if (!sessionExists) {
+      const sessionBefore = await sessionService.getById(usuario_id, id);
+      if (!sessionBefore) {
         return res.status(404).json({ message: 'Sessão não encontrada.' });
       }
 
       const updatedSession = await sessionService.changeStatus(id, realizado);
+      if (realizado === true && !sessionBefore.realizado) {
+        try {
+          await notificationService.notifyReviewAvailable(id);
+        } catch (e) {
+          console.error('Falha ao notificar avaliacao disponivel:', e?.message || e);
+        }
+      }
       res.json(updatedSession);
 
     } catch (error) {
