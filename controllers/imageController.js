@@ -18,7 +18,8 @@ const uploadImage = async (req, res) => {
     await userService.updateImage(userId, path);
     console.log(userImage);
     if (userImage) {
-      await s3.deleteFile(userImage);
+      const oldPath = String(userImage).replace(`${BUCKET_PUB_URL}/`, '');
+      await s3.deleteFile(oldPath);
     }
     return res.status(200).json({ image: `${BUCKET_PUB_URL}/${path}` });
   } catch (err) {
