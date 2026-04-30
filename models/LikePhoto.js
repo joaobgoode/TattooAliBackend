@@ -15,7 +15,7 @@ const LikePhoto = sequelize.define("LikePhoto",
       allowNull: false,
       references: {
         model: User,
-        key: "usuario_id",
+        key: "user_id",
       },
     },
     photo_id: {
