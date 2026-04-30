@@ -141,7 +141,7 @@ async function updateReport(id, status, moderadorNome, respostaModerador) {
     await denuncia.update(updateData);
     
     
-    const denunciaAtualizada = await buscarDenunciaPorId(id);
+    const denunciaAtualizada = await getReportById(id);
     
     return denunciaAtualizada;
   } catch (error) {
