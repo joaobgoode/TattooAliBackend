@@ -5,6 +5,7 @@ const reportController = require('../controllers/reportController.js')
 
 router.post('/', auth.authenticateToken, reportController.createReport);
 router.get('/all',auth.authenticateToken, reportController.getAllReports);
+router.get('/my', auth.authenticateToken, reportController.getMyReports);
 router.get('/:id', auth.authenticateToken, reportController.getReportById);
 router.patch('/:id/status', auth.authenticateToken, reportController.updateReportStatus);
 router.delete('/:id', auth.authenticateToken, reportController.deleteReport);
