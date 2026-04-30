@@ -1,4 +1,5 @@
 const Review = require("../models/Review.js");
+const ReviewReply = require("../models/ReviewReply.js");
 const client = require("../models/Client.js");
 const User = require("../models/user.js");
 const { Op } = require("sequelize");
@@ -19,6 +20,20 @@ const includeTatuador = {
   attributes: ["user_id", "nome", "sobrenome"],
 };
 
+const includeRespostas = {
+  model: ReviewReply,
+  as: "respostas",
+  attributes: ["review_reply_id", "autor_id", "autor_tipo", "resposta", "createdAt"],
+  include: [
+    {
+      model: User,
+      as: "autor",
+      attributes: ["user_id", "nome", "sobrenome"],
+    },
+  ],
+  required: false,
+};
+
 async function getAllByClienteCpf(cpf) {
   const c = normalizeCpf(cpf);
   if (c.length !== 11) return [];
@@ -30,7 +45,7 @@ async function getAllByClienteCpf(cpf) {
   if (!ids.length) return [];
   return Review.findAll({
     where: { cliente_id: { [Op.in]: ids } },
-    include: [includeCliente, includeTatuador],
+    include: [includeCliente, includeTatuador, includeRespostas],
     order: [["createdAt", "DESC"]],
   });
 }
