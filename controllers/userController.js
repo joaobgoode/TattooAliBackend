@@ -224,28 +224,22 @@ async function recoverPassword(req, res) {
 
 async function alterarSenha(req, res) {
   try {
-    const { token, novaSenha } = req.body;
+    const { novaSenha } = req.body; // O ID do usuário deve vir do middleware de autenticação (req.user.id)
 
-    if (!token) {
-      return res.status(401).json({ error: 'Token de autenticação é obrigatório' });
+    // Assumindo que req.user.id é populado por um middleware de autenticação com o ID do usuário do Supabase
+    const supabaseUserId = req.user?.id;
+    if (!supabaseUserId) {
+      return res.status(401).json({ error: 'Usuário não autenticado ou ID de usuário ausente.' });
     }
 
     if (!novaSenha) {
       return res.status(400).json({ error: 'Nova senha é obrigatória' });
     }
-
     if (novaSenha.length < 6) {
       return res.status(400).json({ error: 'A senha deve ter pelo menos 6 caracteres' });
     }
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    
-    if (userError || !user) {
-      return res.status(401).json({ error: 'Token inválido ou expirado' });
-    }
-
     const { data, error } = await supabase.auth.admin.updateUserById(
-      user.id,
+      supabaseUserId,
       { password: novaSenha }
     );
 
@@ -263,7 +257,5 @@ async function alterarSenha(req, res) {
     return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 }
-
-
 
 module.exports = { register, login, recoverPassword, alterarSenha, getMe };

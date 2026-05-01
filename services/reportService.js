@@ -1,3 +1,4 @@
+
 const Report = require("../models/Report");
 const User = require("../models/user")
 const Client = require("../models/Client")
@@ -23,7 +24,10 @@ async function createReport(data) {
     const denunciaExistente = await Report.findOne({
       where: {
         denunciante: data.denuncianteNome,
-        denunciado: data.denunciadoNome,
+        tipo_denunciado: data.tipoDenunciado, // Inclui o tipo de denunciado na verificação
+        ...(data.tipoDenunciado === 'user'
+          ? { reported_user_id: data.denunciadoId }
+          : { reported_client_id: data.denunciadoId }),
         status: ['pendente', 'analisando']
       }
     });
@@ -36,11 +40,13 @@ async function createReport(data) {
     const denuncia = await Report.create({
       descricao: data.descricao,
       status: 'pendente',
-      denunciante: data.denuncianteNome,
-      denunciado: data.denunciadoNome,
+      denunciante_nome: data.denuncianteNome, // Atualizado para denunciante_nome
+      denunciado_nome: data.denunciadoNome,   // Atualizado para denunciado_nome
       moderador: 'nenhum',
-      cliente_id: data.tipoDenunciado === 'client' ? data.denunciadoId : null,
-      usuario_id: data.tipoDenunciado === 'user' ? data.denunciadoId : data.denuncianteId
+      reported_client_id: data.tipoDenunciado === 'client' ? data.denunciadoId : null,
+      reported_user_id: data.tipoDenunciado === 'user' ? data.denunciadoId : null,
+      denunciante_user_id: data.denuncianteId,
+      tipo_denunciado: data.tipoDenunciado // Armazena o tipo da entidade denunciada para uso no frontend.
     });
     
     return denuncia;
@@ -55,16 +61,53 @@ async function getAllReports() {
       include: [
         {
           model: User,
-          as: 'User',
+          as: 'denuncianteUser',
           attributes: ['user_id', 'nome', 'sobrenome', 'email', 'role']
         },
         {
           model: Client,
-          as: 'client',
+          as: 'reportedClient',
           attributes: ['client_id', 'nome', 'descricao', 'telefone']
+        },
+        { // Adicionado para incluir o usuário denunciado, se for o caso
+          model: User,
+          as: 'reportedUser',
+          attributes: ['user_id', 'nome', 'sobrenome', 'email', 'role']
         }
       ],
-      order: [['createdAt', 'DESC']]
+      order: [['created_at', 'DESC']] // Usando o nome do campo do modelo
+    });
+    
+    return denuncias;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function getReportsByDenuncianteId(denuncianteUserId) { // Renomeado para maior clareza
+  try {
+    const denuncias = await Report.findAll({
+      include: [
+        {
+          model: User,
+          as: 'denuncianteUser',
+          attributes: ['user_id', 'nome', 'sobrenome', 'email', 'role']
+        },
+        {
+          model: Client,
+          as: 'reportedClient',
+          attributes: ['client_id', 'nome', 'descricao', 'telefone']
+        },
+        { // Adicionado para incluir o usuário denunciado, se for o caso
+          model: User,
+          as: 'reportedUser',
+          attributes: ['user_id', 'nome', 'sobrenome', 'email', 'role']
+        }
+      ],
+      where: { // Filtra as denúncias pelo ID do usuário denunciante
+        denunciante_user_id: denuncianteUserId // Usando o novo nome do campo
+      },
+      order: [['created_at', 'DESC']] // Usando o nome do campo do modelo
     });
     
     return denuncias;
@@ -79,13 +122,18 @@ async function getReportById(id) {
       include: [
         {
           model: User,
-          as: 'User',
+          as: 'denuncianteUser',
           attributes: ['user_id', 'nome', 'sobrenome', 'email', 'role']
         },
         {
           model: Client,
-          as: 'client',
+          as: 'reportedClient',
           attributes: ['client_id', 'nome', 'descricao', 'telefone']
+        },
+        { // Adicionado para incluir o usuário denunciado, se for o caso
+          model: User,
+          as: 'reportedUser',
+          attributes: ['user_id', 'nome', 'sobrenome', 'email', 'role']
         }
       ]
     });
@@ -154,5 +202,6 @@ module.exports = {
   getReportById,
   getAllReports,
   deleteReport,
-  updateReport,
+  updateReport, // Exporta a nova função
+  getReportsByDenuncianteId,
 };

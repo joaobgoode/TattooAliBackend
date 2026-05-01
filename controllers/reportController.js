@@ -1,17 +1,12 @@
 const reportService = require("../services/reportService");
-const User = require("../models/user.js");
 
 async function createReport(req, res) {
   try {
     const { descricao, denunciadoId, tipoDenunciado, denunciadoNome } =
       req.body;
+
+    const denuncianteNome = req.user?.nome;
     const denuncianteId = req.user?.id;
-    const denunciante = denuncianteId
-      ? await User.findByPk(denuncianteId, { attributes: ["nome", "sobrenome"] })
-      : null;
-    const denuncianteNome = denunciante
-      ? `${denunciante.nome || ""} ${denunciante.sobrenome || ""}`.trim() || "Usuário"
-      : "Usuário";
 
     if (!descricao || descricao.trim().length === 0) {
       return res.status(400).json({
@@ -86,13 +81,8 @@ async function updateReportStatus(req, res) {
   try {
     const { id } = req.params;
     const { status, respostaModerador } = req.body;
-    const moderadorId = req.user?.id;
-    const moderador = moderadorId
-      ? await User.findByPk(moderadorId, { attributes: ["nome", "sobrenome"] })
-      : null;
-    const moderadorNome = moderador
-      ? `${moderador.nome || ""} ${moderador.sobrenome || ""}`.trim() || "Moderador"
-      : "Moderador";
+
+    const moderadorNome = req.user?.nome || 'Sistema';
 
     if (!status) {
       return res.status(400).json({
@@ -138,10 +128,33 @@ async function deleteReport(req, res) {
   }
 }
 
+async function getMyReports(req, res) {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Não autenticado.' });
+    }
+
+    const denuncias = await reportService.getReportsByDenuncianteId(userId);
+
+    return res.status(200).json({
+      success: true,
+      data: denuncias || []
+    });
+  } catch (error) {
+    console.error('Erro ao buscar denúncias:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Erro interno ao buscar denúncias.' 
+    });
+  }
+}
+
 module.exports = {
   createReport,
   getAllReports,
   getReportById,
   updateReportStatus,
   deleteReport,
+  getMyReports,
 };
