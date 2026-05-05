@@ -4,7 +4,13 @@ const User = require("../models/user.js");
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false, // Necessário para o backend (Node.js)
+    autoRefreshToken: false,
+    detectSessionInUrl: false
+  }
+});
 
 /**
  * Só valida JWT Supabase e preenche req.user (rotas que não exigem checagem de role no Postgres).
@@ -14,6 +20,7 @@ async function authenticateToken(req, res, next) {
   const token = authHeader && authHeader.split(" ")[1];
 
   if (token == null) {
+    console.log("DEBUG [middleware] Token ausente no Header Authorization");
     return res.status(401).json({ error: "Token não fornecido." });
   }
 
@@ -21,7 +28,8 @@ async function authenticateToken(req, res, next) {
     const { data, error } = await supabase.auth.getUser(token);
 
     if (error) {
-      console.error("Erro de autenticação Supabase:", error.message);
+      console.error("ERRO SUPABASE NO MIDDLEWARE:", JSON.stringify(error, null, 2));
+      // Se o erro for session_missing, pode ser token mal formado ou expirado
       return res.status(403).json({ error: "Token inválido ou expirado." });
     }
 
