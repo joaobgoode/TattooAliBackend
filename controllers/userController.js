@@ -3,7 +3,13 @@ const { registerSchema, loginSchema } = require('../schemas/userSchema'); // Aju
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false, // Necessário para o backend (Node.js)
+    autoRefreshToken: false,
+    detectSessionInUrl: false
+  }
+});
 
 const userService = require('../services/userService');
 const authService = require('../services/authService');
@@ -224,12 +230,26 @@ async function recoverPassword(req, res) {
 
 async function alterarSenha(req, res) {
   try {
-    const { novaSenha } = req.body; // O ID do usuário deve vir do middleware de autenticação (req.user.id)
+    const { novaSenha } = req.body;
 
-    // Assumindo que req.user.id é populado por um middleware de autenticação com o ID do usuário do Supabase
-    const supabaseUserId = req.user?.id;
+    let supabaseUserId = req.user?.sub || req.user?.id;
+
+    console.log('DEBUG [alterarSenha] User inicial do middleware:', req.user);
+
     if (!supabaseUserId) {
-      return res.status(401).json({ error: 'Usuário não autenticado ou ID de usuário ausente.' });
+      const authHeader = req.headers["authorization"];
+      const token = authHeader && authHeader.split(" ")[1];
+
+      if (token) {
+        const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+        if (!userError && user) {
+          supabaseUserId = user.id; // UUID do Supabase
+        }
+      }
+    }
+
+    if (!supabaseUserId) {
+      return res.status(401).json({ error: 'Sessão inválida ou expirada. Tente fazer login ou solicitar um novo e-mail.' });
     }
 
     if (!novaSenha) {
@@ -244,7 +264,8 @@ async function alterarSenha(req, res) {
     );
 
     if (error) {
-      console.error('Erro ao atualizar senha:', error);
+      // Loga o erro completo em formato JSON legível
+      console.error('ERRO SUPABASE DETALHADO:', JSON.stringify(error, null, 2));
       return res.status(400).json({ error: error.message });
     }
 
@@ -253,9 +274,27 @@ async function alterarSenha(req, res) {
     });
 
   } catch (error) {
-    console.error('Erro interno no servidor:', error);
+    // Loga o erro da exceção (caso ocorra antes ou depois da chamada ao Supabase)
+    console.error('ERRO INTERNO NO CONTROLLER:', error);
     return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 }
 
-module.exports = { register, login, recoverPassword, alterarSenha, getMe };
+async function validarToken(req, res) {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ error: 'Token não fornecido.' });
+
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return res.status(401).json({ error: 'Token expirado ou inválido.' });
+    }
+
+    return res.status(200).json({ valid: true });
+  } catch (error) {
+    return res.status(500).json({ error: 'Erro ao validar token.' });
+  }
+}
+
+module.exports = { register, login, recoverPassword, alterarSenha, getMe, validarToken };

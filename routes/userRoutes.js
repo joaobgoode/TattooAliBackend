@@ -10,7 +10,7 @@ router.post('/register', userController.register);
 router.post('/login', userController.login);
 router.get('/me', auth.authenticateToken, userController.getMe);
 router.post('/recuperar-senha', userController.recoverPassword);
-router.post('/alterar-senha', userController.alterarSenha);
+router.post('/alterar-senha', auth.authenticateToken, userController.alterarSenha);
 router.post('/upload-foto', auth.authenticateToken, upload.single('image'), imageController.uploadImage);
 
 
