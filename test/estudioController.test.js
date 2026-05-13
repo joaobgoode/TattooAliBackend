@@ -1,5 +1,6 @@
 const express = require("express");
 const request = require("supertest");
+const { cnpj: cnpjValidator } = require("cpf-cnpj-validator");
 const estudioController = require("../controllers/estudioController");
 const estudioService = require("../services/estudioService");
 
@@ -7,8 +8,13 @@ jest.mock("../services/estudioService", () => ({
   create: jest.fn(),
   getAll: jest.fn(),
   getById: jest.fn(),
+  belongsToUser: jest.fn(),
   update: jest.fn(),
   remove: jest.fn(),
+}));
+
+jest.mock("cpf-cnpj-validator", () => ({
+  cnpj: { isValid: jest.fn() },
 }));
 
 function buildApp() {
@@ -35,12 +41,13 @@ describe("Estúdio Controller", () => {
     nome: "Estúdio Teste",
     telefone: "11999998888",
     endereco: "Rua do Teste, 123",
-    cnpj: "12345678000199", // exemplo de CNPJ válido
+    cnpj: "12345678000199",
   };
 
   beforeEach(() => {
     app = buildApp();
     jest.clearAllMocks();
+    cnpjValidator.isValid.mockReturnValue(true);
   });
 
   it("cria um estúdio com dados válidos", async () => {
@@ -67,6 +74,8 @@ describe("Estúdio Controller", () => {
   });
 
   it("retorna 400 para CNPJ inválido", async () => {
+    cnpjValidator.isValid.mockReturnValue(false);
+
     const res = await request(app)
       .post("/api/estudio")
       .send({ ...validEstudio, cnpj: "11111111000191" });
@@ -89,6 +98,7 @@ describe("Estúdio Controller", () => {
     estudioService.getAll.mockResolvedValue([
       { estudio_id: 1, ...validEstudio },
     ]);
+
     const res = await request(app).get("/api/estudio");
 
     expect(res.statusCode).toBe(200);
@@ -101,6 +111,7 @@ describe("Estúdio Controller", () => {
       estudio_id: 1,
       ...validEstudio,
     });
+
     const res = await request(app).get("/api/estudio/1");
 
     expect(res.statusCode).toBe(200);
@@ -109,6 +120,7 @@ describe("Estúdio Controller", () => {
 
   it("retorna 404 se estúdio não existir", async () => {
     estudioService.getById.mockResolvedValue(null);
+
     const res = await request(app).get("/api/estudio/999");
 
     expect(res.statusCode).toBe(404);

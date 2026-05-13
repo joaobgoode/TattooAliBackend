@@ -14,6 +14,11 @@ async function getEstudioById(id) {
     return await Estudio.findByPk(id);
 }
 
+async function belongsToUser(id, user_id) {
+  const row = await Estudio.findOne({ where: { estudio_id: id, user_id } });
+  return !!row;
+}
+
 async function updateImage(id, path) {
   const estudio = await Estudio.findByPk(id);
   if (!estudio) return null;
@@ -28,4 +33,4 @@ async function deleteEstudio(id) {
   return estudio;
 }
 
-module.exports = { createEstudio, getAllEstudios, getEstudioById, updateImage, deleteEstudio }
+module.exports = { createEstudio, getAllEstudios, getEstudioById, updateImage, deleteEstudio, belongsToUser }
