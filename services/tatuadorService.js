@@ -106,10 +106,11 @@ async function getUserPerfil(user_id) {
 }
 
 /**
- * Lista tatuadores para busca (app cliente). Filtro opcional por texto e por nome de estilo.
+ * Lista tatuadores para busca (app cliente). Filtro opcional por texto, nome de estilo e
+ * média mínima de avaliações (min_rating 1–5: só tatuadores com AVG(reviews.nota) >= min_rating).
  */
-async function searchTatuadores({ q = '', estilo = 'Todos' } = {}) {
-  const where = { role: 'tatuador' };
+async function searchTatuadores({ q = '', estilo = 'Todos', min_rating = null } = {}) {
+  const andConditions = [{ role: 'tatuador' }];
   const term = String(q || '').trim();
   if (term) {
     const like = `%${term}%`;
@@ -117,24 +118,40 @@ async function searchTatuadores({ q = '', estilo = 'Todos' } = {}) {
     const styleMatchSql = stylePatterns
       .map((p) => `s.nome ILIKE ${sequelize.escape(p)}`)
       .join(' OR ');
-    where[Op.or] = [
-      { nome: { [Op.iLike]: like } },
-      { sobrenome: { [Op.iLike]: like } },
-      { bio: { [Op.iLike]: like } },
-      { endereco: { [Op.iLike]: like } },
-      literal(`EXISTS (
+    andConditions.push({
+      [Op.or]: [
+        { nome: { [Op.iLike]: like } },
+        { sobrenome: { [Op.iLike]: like } },
+        { bio: { [Op.iLike]: like } },
+        { endereco: { [Op.iLike]: like } },
+        literal(`EXISTS (
         SELECT 1 FROM "Bairros" AS b
         WHERE b.id = "User"."bairro_id"
         AND b.nome ILIKE ${sequelize.escape(like)}
       )`),
-      literal(`EXISTS (
+        literal(`EXISTS (
         SELECT 1 FROM "UserStyles" AS us
         INNER JOIN "Styles" AS s ON s.id = us."StyleId"
         WHERE us."UserUserId" = "User"."user_id"
         AND (${styleMatchSql})
       )`),
-    ];
+      ],
+    });
   }
+
+  const minRatingInt =
+    min_rating != null ? Number.parseInt(String(min_rating), 10) : NaN;
+  if (Number.isFinite(minRatingInt) && minRatingInt >= 1 && minRatingInt <= 5) {
+    andConditions.push(
+      literal(
+        `(SELECT COALESCE(AVG(r.nota), 0) FROM "Reviews" AS r WHERE r.usuario_id = "User"."user_id") >= ${sequelize.escape(
+          minRatingInt,
+        )}`,
+      ),
+    );
+  }
+
+  const where = { [Op.and]: andConditions };
 
   const styleInclude = {
     model: Style,

@@ -103,11 +103,19 @@ async function getUserPerfil(req, res) {
   }
 }
 
+function parseMinRatingQuery(raw) {
+  if (raw == null || String(raw).trim() === '') return null;
+  const n = Number.parseInt(String(raw), 10);
+  if (!Number.isFinite(n) || n < 1 || n > 5) return null;
+  return n;
+}
+
 async function searchTatuadores(req, res) {
   try {
     const q = req.query.q ?? '';
     const estilo = req.query.estilo ?? 'Todos';
-    const results = await tatuadorService.searchTatuadores({ q, estilo });
+    const min_rating = parseMinRatingQuery(req.query.min_rating);
+    const results = await tatuadorService.searchTatuadores({ q, estilo, min_rating });
     res.status(200).json(results);
   } catch (error) {
     console.error('searchTatuadores:', error);
