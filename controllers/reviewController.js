@@ -79,6 +79,29 @@ async function getReviews(req, res) {
   }
 }
 
+async function getReviewsByClienteId(req, res) {
+  const clienteId = Number.parseInt(String(req.params.clienteId), 10);
+  if (!Number.isFinite(clienteId) || clienteId < 1) {
+    return res.status(400).json({ error: "cliente_id inválido" });
+  }
+  try {
+    const cpf = await cpfFromAuthenticatedUser(req);
+    if (String(cpf || "").replace(/\D/g, "").length !== 11) {
+      return res.status(400).json({ error: "CPF não encontrado no cadastro." });
+    }
+    const reviews = await reviewService.getAllByClienteIdForCpf(
+      clienteId,
+      cpf
+    );
+    if (reviews === null) {
+      return res.status(404).json({ error: "Cliente não encontrado." });
+    }
+    return res.status(200).json(reviews);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+}
+
 async function deleteReview(req, res) {
   const { id } = req.params;
 
@@ -129,6 +152,7 @@ async function updateReview(req, res) {
 module.exports = {
   postReview,
   getReviews,
+  getReviewsByClienteId,
   updateReview,
   deleteReview,
 };

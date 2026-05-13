@@ -8,6 +8,11 @@ const reviewReplyController = require("../controllers/reviewReplyController.js")
 // requireCliente bloqueava contas role "tatuador" que também são clientes na agenda de outro artista.
 router.post('/', auth.authenticateToken, reviewController.postReview);
 router.get('/all', auth.authenticateToken, reviewController.getReviews);
+router.get(
+  '/cliente/:clienteId',
+  auth.authenticateToken,
+  reviewController.getReviewsByClienteId
+);
 router.delete('/:id', auth.authenticateToken, reviewController.deleteReview);
 router.patch('/:id', auth.authenticateToken, reviewController.updateReview);
 router.get(
