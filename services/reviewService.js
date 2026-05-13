@@ -50,6 +50,24 @@ async function getAllByClienteCpf(cpf) {
   });
 }
 
+/** Lista avaliações de um registro de cliente; só retorna dados se o CPF bater com o cliente. */
+async function getAllByClienteIdForCpf(clienteId, cpf) {
+  const c = normalizeCpf(cpf);
+  if (c.length !== 11) return null;
+  const id = Number.parseInt(String(clienteId), 10);
+  if (!Number.isFinite(id) || id < 1) return null;
+  const row = await client.findOne({
+    where: { client_id: id, cpf: c },
+    attributes: ["client_id"],
+  });
+  if (!row) return null;
+  return Review.findAll({
+    where: { cliente_id: id },
+    include: [includeCliente, includeTatuador, includeRespostas],
+    order: [["createdAt", "DESC"]],
+  });
+}
+
 async function createFromValidatedSession(session, { nota, comentario }) {
   const rawDate = session.getDataValue("data_atendimento");
   const existing = await Review.findOne({
@@ -105,6 +123,7 @@ async function deleteReview(reviewId, cpf) {
 
 module.exports = {
   getAllByClienteCpf,
+  getAllByClienteIdForCpf,
   createFromValidatedSession,
   findByPkForClienteCpf,
   updateReview,
