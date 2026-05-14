@@ -23,6 +23,7 @@ const favoritoRoutes = require('./routes/favoritoRoutes.js')
 const likePhotoRoutes = require('./routes/likePhotoRoutes.js');
 const notificationRoutes = require('./routes/notificationRoutes.js')
 const reportRoutes = require('./routes/reportRoutes.js')
+const estudioRoutes = require('./routes/estudioRoutes.js');
 
 const allowedOrigins =
   process.env.NODE_ENV === "production"
@@ -66,6 +67,7 @@ app.use('/health', healthRoutes);
 // Perfil
 app.use('/api/user', userRoutes);
 app.use('/api/perfil', perfilRoutes);
+app.use('/api/estudio', estudioRoutes);
 app.use('/api/image', imageRoutes);
 app.use('/api/style', styleRoutes)
 // Client
