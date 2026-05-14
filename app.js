@@ -20,6 +20,7 @@ const bairroRoutes = require('./routes/bairroRoutes.js')
 const tatuadorRoutes = require('./routes/tatuadorRoutes.js')
 const reviewRoutes = require('./routes/reviewRoutes.js')
 const favoritoRoutes = require('./routes/favoritoRoutes.js')
+const followRoutes = require('./routes/followRoutes.js')
 const likePhotoRoutes = require('./routes/likePhotoRoutes.js');
 const notificationRoutes = require('./routes/notificationRoutes.js')
 const reportRoutes = require('./routes/reportRoutes.js')
@@ -94,6 +95,7 @@ app.use('/api/reviews', reviewRoutes)
 // A rota '/api/reports/my' deve ser definida no reportRoutes.js e o '/api/reports/:id' para getReportById
 app.use('/api/reports', reportRoutes) 
 app.use('/api/favoritos', favoritoRoutes)
+app.use('/api/follow', followRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/mobile/notifications', notificationRoutes)
 
