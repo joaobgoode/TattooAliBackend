@@ -16,6 +16,35 @@ const authService = require('../services/authService');
 const User = require('../models/user.js');
 const Client = require('../models/Client.js');
 
+function normalizeCpfDigits(cpf) {
+  return String(cpf || '').replace(/\D/g, '');
+}
+
+/** Mensagem amigável para conflitos de cadastro (CPF/e-mail duplicado). */
+function registerConflictMessage(error) {
+  if (!error) return null;
+  const name = String(error.name || '');
+
+  if (name === 'SequelizeUniqueConstraintError') {
+    const fields = (error.errors || []).map((e) => e.path).filter(Boolean);
+    if (fields.includes('cpf')) return 'Este CPF já está cadastrado.';
+    if (fields.includes('email')) return 'Este e-mail já está cadastrado.';
+    return 'CPF ou e-mail já cadastrado.';
+  }
+
+  if (name === 'SequelizeValidationError') {
+    const fields = (error.errors || []).map((e) => e.path).filter(Boolean);
+    if (fields.includes('cpf')) return 'Este CPF já está cadastrado ou é inválido.';
+    if (fields.includes('email')) return 'Este e-mail já está cadastrado ou é inválido.';
+  }
+
+  const raw = String(error.message || '');
+  if (/Validation error/i.test(raw)) {
+    return 'CPF ou e-mail já cadastrado.';
+  }
+  return null;
+}
+
 async function getMe(req, res) {
   try {
     const id = req.user?.id;
@@ -98,6 +127,24 @@ async function register(req, res) {
   const { nome, sobrenome, cpf, email, senha, telefone, role, bairro_id } =
     validationResult.data;
 
+  const cpfDigits = normalizeCpfDigits(cpf);
+
+  try {
+    const [existingEmail, existingCpf] = await Promise.all([
+      userService.getByEmail(email),
+      userService.getByCpf(cpfDigits),
+    ]);
+    if (existingEmail) {
+      return res.status(409).json({ error: 'Este e-mail já está cadastrado.' });
+    }
+    if (existingCpf) {
+      return res.status(409).json({ error: 'Este CPF já está cadastrado.' });
+    }
+  } catch (lookupErr) {
+    console.error('Erro ao verificar duplicidade no cadastro:', lookupErr);
+    return res.status(500).json({ error: 'Erro ao validar cadastro. Tente novamente.' });
+  }
+
   let supabaseUserId = null;
 
   try {
@@ -108,7 +155,7 @@ async function register(req, res) {
         data: {
           nome,
           sobrenome,
-          cpf,
+          cpf: cpfDigits,
           telefone: telefone || null,
           role: role
         }
@@ -116,6 +163,10 @@ async function register(req, res) {
     });
 
     if (authError) {
+      const authMsg = String(authError.message || '');
+      if (/already registered|already exists|duplicate/i.test(authMsg)) {
+        return res.status(409).json({ error: 'Este e-mail já está cadastrado.' });
+      }
       return res.status(400).json({ error: authError.message });
     }
 
@@ -124,7 +175,7 @@ async function register(req, res) {
     const dataToCreate = {
       nome,
       sobrenome,
-      cpf,
+      cpf: cpfDigits,
       email,
       // A senha salva no DB local será um hash feito pelo hook do Sequelize, não a string "Senha nao utilizada"
       // Aqui usamos "Senha não utilizada" apenas para satisfazer o campo NOT NULL do Sequelize
@@ -153,7 +204,7 @@ async function register(req, res) {
           user_id: user_id_int,
           nome,
           sobrenome,
-          cpf,
+          cpf: cpfDigits,
           telefone: telefone || null,
           role: role || 'tatuador'
         }
@@ -175,7 +226,12 @@ async function register(req, res) {
         console.error("Erro CRÍTICO ao tentar reverter o usuário no Supabase Auth:", deleteError.message);
       }
     }
-    return res.status(500).json({ error: error.message });
+    const friendly = registerConflictMessage(error);
+    if (friendly) {
+      return res.status(409).json({ error: friendly });
+    }
+    console.error('Erro no cadastro de usuário:', error);
+    return res.status(500).json({ error: error.message || 'Erro ao criar conta.' });
   }
 }
 
@@ -216,15 +272,39 @@ async function recoverPassword(req, res) {
       return res.status(400).json({ error: 'Email é obrigatório.' });
     }
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const redirectTo = `${frontendUrl}/reset-password`; 
+    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+    const redirectTo = `${frontendUrl}/alterar-senha`;
 
     await authService.sendPasswordResetEmail(email, redirectTo);
 
-    return res.status(200).json({ message: 'Se houver uma conta com esse e-mail, você receberá instruções para recuperar a senha.' });
+    return res.status(200).json({
+      message: 'Se houver uma conta com esse e-mail, você receberá instruções para recuperar a senha.',
+    });
   } catch (error) {
     console.error('Erro ao solicitar recuperação de senha:', error.message || error);
-    return res.status(500).json({ error: 'Erro ao processar solicitação de recuperação de senha.' });
+
+    const msg = String(error?.message || error?.original?.message || '');
+    const code = error?.code || error?.original?.code;
+
+    if (code === 'over_email_send_rate_limit' || /rate limit/i.test(msg)) {
+      return res.status(429).json({
+        error: 'Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.',
+      });
+    }
+    if (/redirect.*url|invalid redirect/i.test(msg)) {
+      return res.status(400).json({
+        error: 'URL de redirecionamento não autorizada no Supabase. Configure FRONTEND_URL e a URL em Authentication → URL Configuration.',
+      });
+    }
+    if (/smtp|mail|email.*send/i.test(msg)) {
+      return res.status(503).json({
+        error: 'Envio de e-mail indisponível no momento. Tente mais tarde.',
+      });
+    }
+
+    return res.status(500).json({
+      error: msg || 'Erro ao processar solicitação de recuperação de senha.',
+    });
   }
 }
 

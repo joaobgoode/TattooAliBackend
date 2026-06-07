@@ -23,4 +23,10 @@ async function getByEmail(userEmail) {
   })
 }
 
-module.exports = { create, getById, getByEmail, updateImage };
+async function getByCpf(cpf) {
+  const digits = String(cpf || '').replace(/\D/g, '');
+  if (!digits) return null;
+  return await User.findOne({ where: { cpf: digits } });
+}
+
+module.exports = { create, getById, getByEmail, getByCpf, updateImage };
