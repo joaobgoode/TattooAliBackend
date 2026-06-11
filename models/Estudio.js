@@ -2,7 +2,6 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../db/database');
 
 const User = require('./user');
-const Review = require('./Review');
 
 const Estudio = sequelize.define('Estudio', {
     estudio_id:{
@@ -31,4 +30,3 @@ const Estudio = sequelize.define('Estudio', {
 });
 
 Estudio.belongsTo(User, { foreignKey: 'user_id' });
-Estudio.hasMany(Review, { foreignKey: "user_id", as: "Reviews" });
